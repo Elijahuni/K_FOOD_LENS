@@ -128,6 +128,9 @@ ENV/
 env.bak/
 venv.bak/
 
+# Project specific virtual environment
+kfood-env/
+
 # Spyder project settings
 .spyderproject
 .spyproject
