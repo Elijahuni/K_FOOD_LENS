@@ -1,0 +1,337 @@
+[
+    {
+      "dishId": "0",
+      "nameKo": "김밥",
+      "nameEn": "Gimbap",
+      "classId": "C001",
+      "className": "Rice Dishes",
+      "koreanCategory": "밥 [Bap]",
+      "allergens": [
+        "글루텐"
+      ],
+      "vegetarianStatus": "부분채식",
+      "descriptionKo": "흰밥을 소금과 참기름으로 밑간한 뒤 살짝 구운 김 위에 얇게 펼쳐 놓고 시금치, 당근, 단무지, 고기볶음 등을 넣어 둘둘 말아 알맞은 크기로 썰어 먹는 음식이다.",
+      "descriptionEn": "Rice seasoned with salt and sesame oil and rolled up in a sheet of roasted gim (dried laver) with spinach, carrots, and pickled white radish. The long roll is sliced and served in bite-sized pieces."
+    },
+    {
+      "dishId": "1",
+      "nameKo": "떡볶이",
+      "nameEn": "Stir-fried Rice Cake",
+      "classId": "C002",
+      "className": "Stir-Fried Dishes",
+      "koreanCategory": "볶음 [Bokkeum]",
+      "allergens": [
+        "글루텐"
+      ],
+      "vegetarianStatus": "부분채식",
+      "descriptionKo": "한입 크기로 썬 가래떡이나 가늘게 뽑은 떡볶이용 떡에 채소, 어묵을 함께 넣고 고추장 양념으로 볶은 음식이다.",
+      "descriptionEn": "Sliced rice cake bar (garaetteok) or thin rice cake sticks(Tteokbokkitteok) stir-fried in a spicy gochujang sauce with vegetables and fish cakes."
+    },
+    {
+      "dishId": "2",
+      "nameKo": "삼계탕",
+      "nameEn": "Ginseng Chicken Soup",
+      "classId": "C003",
+      "className": "Soup Dishes",
+      "koreanCategory": "탕 [Tang]",
+      "allergens": [],
+      "vegetarianStatus": "비채식",
+      "descriptionKo": "어린 닭의 배 속에 인삼, 대추, 밤, 찹쌀, 마늘 등을 넣고 푹 고아 만든 음식이다. 닭고기와 인삼이 조화를 이룬 전통적인 여름철 보양식이다.",
+      "descriptionEn": "Tender, whole, young chicken stuffed with ginseng, jujubes, sweet rice, and whole garlic cloves and simmered until tender. The combination of chicken and ginseng creates a complex yet harmonious flavor. This is a classic summertime dish that revitalizes the body and soul."
+    },
+    {
+      "dishId": "3",
+      "nameKo": "배추김치",
+      "nameEn": "Kimchi(Baechukimchi)",
+      "classId": "C004",
+      "className": "Kimchi Varieties",
+      "koreanCategory": "김치 [Kimchi]",
+      "allergens": [],
+      "vegetarianStatus": "부분채식",
+      "descriptionKo": "배추를 소금에 절인 다음 잎 사이사이에 무채, 고춧가루, 다진 마늘, 젓갈 등을 버무린 소를 넣어 담근 김치다. 밥과 함께 한국인의 밥상에 반드시 오르는 반찬이다.",
+      "descriptionEn": "Salted Korean cabbage stuffed with a mixture of julienned white radish, red chili powder, minced garlic, and salted fish. Along with rice, kimchi is a required dish with every Korean meal."
+    },
+    {
+      "dishId": "4",
+      "nameKo": "자장면",
+      "nameEn": "Jajangmyeon",
+      "classId": "C005",
+      "className": "Noodle Dishes",
+      "koreanCategory": "면 [Myeon]",
+      "allergens": [
+        "글루텐",
+        "대두"
+      ],
+      "vegetarianStatus": "부분채식",
+      "descriptionKo": "자장면은 춘장, 다진 돼지고기, 양파, 감자 등의 재료로 만든 검은 소스를 삶은 밀가루 면에 비벼 먹는 한국식 중화요리이다. 이사나 특별한 날에 자주 먹는 대표적인 배달 음식이다.",
+      "descriptionEn": "Noodles topped with a thick sauce made from black bean paste, diced pork, onions, and potatoes. A popular Korean-Chinese delivery food often enjoyed on moving days or special occasions."
+    },
+    {
+      "dishId": "5",
+      "nameKo": "파전",
+      "nameEn": "Green Onion Pancake",
+      "classId": "C006",
+      "className": "Korean Pancakes",
+      "koreanCategory": "전 [Jeon]",
+      "allergens": [
+        "글루텐"
+      ],
+      "vegetarianStatus": "부분채식",
+      "descriptionKo": "막걸리와 잘 어울리며 연한 쪽파를 주재료로 만든 전으로 밀가루 반죽에 길쭉길쭉하게 썬 파를 섞어 부친 다음 초간장에 찍어 먹는다.",
+      "descriptionEn": "Tender young green onions mixed with a flour batter and pan-fried in oil. Served with a soy vinaigrette dipping sauce. It goes well with makgeolli, which is traditional Korean wine."
+    },
+    {
+      "dishId": "6",
+      "nameKo": "양념치킨",
+      "nameEn": "Seasoned Fried Chicken",
+      "classId": "C002",
+      "className": "Stir-Fried Dishes",
+      "koreanCategory": "볶음 [Bokkeum]",
+      "allergens": [
+        "글루텐"
+      ],
+      "vegetarianStatus": "비채식",
+      "descriptionKo": "적당한 크기로 자른 닭고기를 밑간하여 식용유에 튀겨 간장이나 고추장 등으로 만든 양념에 버무린 음식이다. 순하고 부드러우며 매콤한 맛으로 간식이나 안주로 즐겨 먹는다.",
+      "descriptionEn": "This dish is seasoned chicken cut into pieces, deep-fried, and mixed with soy sauce, gochujang, or other sauces. It has a mild yet spicy taste that makes it ideal for a snack, with or without alcoholic beverages."
+    },
+    {
+      "dishId": "7",
+      "nameKo": "장어구이",
+      "nameEn": "Grilled Eel",
+      "classId": "C007",
+      "className": "Grilled Dishes",
+      "koreanCategory": "구이 [Gui]",
+      "allergens": [],
+      "vegetarianStatus": "비채식",
+      "descriptionKo": "장어를 손질하여 소금구이, 간장 양념구이, 고추장 양념구이 등 다양하게 양념하여 구워 먹는다. 장어에는 비타민 A, B, C가 풍부해 피부미용과 노화방지 등에 좋다.",
+      "descriptionEn": "Cleaned eel are seasoned with salt, soy sauce, gochujang, and others to taste, and then grilled. Eel is rich in vitamins A, B, and C, which fight aging and keep the skin healthy and youthful."
+    },
+    {
+      "dishId": "8",
+      "nameKo": "갈치조림",
+      "nameEn": "Braised Cutlassfish",
+      "classId": "C008",
+      "className": "Braised Dishes",
+      "koreanCategory": "조림 [Jorim]",
+      "allergens": [],
+      "vegetarianStatus": "비채식",
+      "descriptionKo": "토막 낸 갈치와 무, 풋고추 등을 냄비에 담은 뒤 고춧가루를 비롯한 마늘 등의 양념장을 끼얹어 고루 간이 배도록 조린 음식이다. 무 대신 감자를 넣어도 별미다.",
+      "descriptionEn": "Cutlassfish cut into pieces and braised in a spicy soy sauce mixture with white radish and green chili peppers. The sauce is spooned over the ingredients while cooking to allow the flavors to seep in. Potato can be used instead of radish."
+    },
+    {
+      "dishId": "9",
+      "nameKo": "불고기",
+      "nameEn": "Bulgogi",
+      "classId": "C007",
+      "className": "Grilled Dishes",
+      "koreanCategory": "구이 [Gui]",
+      "allergens": [
+        "대두"
+      ],
+      "vegetarianStatus": "비채식",
+      "descriptionKo": "간장, 꿀, 다진 파, 마늘, 깨소금, 후춧가루 등으로 만든 양념장에 소고기를 재웠다가 불고기판에 올려 구워 먹는다. 자작한 국물에 밥을 비벼 먹어도 일품이다.",
+      "descriptionEn": "Bulgogi is prepared with beef that has been marinated in soy sauce, honey, minced green onion, garlic, sesame seeds, and pepper, and then grilled. The excess liquid can be mixed with rice, which tastes as good as the bulgogi itself."
+    },
+    {
+      "dishId": "10",
+      "nameKo": "비빔밥",
+      "nameEn": "Bibimbap",
+      "classId": "C001",
+      "className": "Rice Dishes",
+      "koreanCategory": "밥 [Bap]",
+      "allergens": [
+        "대두"
+      ],
+      "vegetarianStatus": "부분채식",
+      "descriptionKo": "쌀밥에 고기볶음, 갖은 나물과 고명을 올리고 고추장에 비벼 먹는 음식이다. 참기름을 첨가하면 더욱 맛있다.",
+      "descriptionEn": "Rice topped with sautéed beef and a variety of colorful vegetables that is mixed at the table with spicy gochujang. A hint of sesame oil helps bring out the flavor."
+    },
+    {
+      "dishId": "11",
+      "nameKo": "삼겹살",
+      "nameEn": "Grilled Pork Belly",
+      "classId": "C007",
+      "className": "Grilled Dishes",
+      "koreanCategory": "구이 [Gui]",
+      "allergens": [],
+      "vegetarianStatus": "비채식",
+      "descriptionKo": "돼지의 배 부위로 살코기와 지방이세 겹으로 되어 있어 육질이 부드럽고 고소하다. 양념을 하지 않고 구워 소금이나 쌈장을 찍어 먹고 채소에 쌈을 싸 먹기도 한다.",
+      "descriptionEn": "Fat-streaked pork belly grilled and dipped in salt or ssamjang (red soybean paste dip). Also eaten wrapped in lettuce leaves."
+    },
+    {
+      "dishId": "12",
+      "nameKo": "순대",
+      "nameEn": "Blood Sausage",
+      "classId": "C009",
+      "className": "Steamed Dishes",
+      "koreanCategory": "찜 [Jjim]",
+      "allergens": [],
+      "vegetarianStatus": "비채식",
+      "descriptionKo": "돼지 곱창에 당면, 채소, 찹쌀, 선지 등을 섞어 양념한 소를 채워 넣고 수증기에 찐 음식이다. 오징어순대, 찹쌀순대, 병천순대, 아바이순대 등 종류가 다양하다.",
+      "descriptionEn": "Pork intestines stuffed with glass noodles, vegetables, sweet rice, coagulated pig's blood (seonji) and steamed. Variations include Ojingeosundae (stuffed squid) and chapssal sundae (sweet rice sundae). This Korean blood sausage also comes in regional variations such as Byeongcheon or Abai Blood Sausage."
+    },
+    {
+      "dishId": "13",
+      "nameKo": "제육볶음",
+      "nameEn": "Stir-fried Pork",
+      "classId": "C002",
+      "className": "Stir-Fried Dishes",
+      "koreanCategory": "볶음 [Bokkeum]",
+      "allergens": [
+        "대두"
+      ],
+      "vegetarianStatus": "비채식",
+      "descriptionKo": "돼지고기를 얇게 저며 생강즙을 넣은 고추장 양념에 재웠다가 볶은 음식이다.기호에 따라 양파, 당근, 깻잎, 양배추 등을 넣기도 한다.",
+      "descriptionEn": "Thinly sliced pork marinated in spicy ginger-gochujang and stir-fried with onion, carrots, perilla leaves, or abbage. Ingredients vary according to taste."
+    },
+    {
+      "dishId": "14",
+      "nameKo": "라면",
+      "nameEn": "Ramyeon",
+      "classId": "C005",
+      "className": "Noodle Dishes",
+      "koreanCategory": "면 [Myeon]",
+      "allergens": [
+        "글루텐"
+      ],
+      "vegetarianStatus": "부분채식",
+      "descriptionKo": "라면은 밀가루 면을 유탕 처리하여 건조시킨 인스턴트 면으로, 뜨거운 물에 끓여 먹는 간편식이다. 매운 국물과 함께 즐기는 한국인이 사랑하는 대표적인 간식 및 야식이다.",
+      "descriptionEn": "Instant noodles made from wheat flour that has been deep-fried and dried, then cooked in boiling water. A popular Korean snack and late-night meal enjoyed with spicy broth."
+    },
+    {
+      "dishId": "15",
+      "nameKo": "물냉면",
+      "nameEn": "Cold Buckwheat Noodles",
+      "classId": "C005",
+      "className": "Noodle Dishes",
+      "koreanCategory": "면 [Myeon]",
+      "allergens": [
+        "글루텐"
+      ],
+      "vegetarianStatus": "부분채식",
+      "descriptionKo": "메밀 면을 삶아 동치미 국물과 소고기 육수 섞은 국물에 차갑게 말아 먹는 음식이다. 무, 배, 등을 얹고 겨자와 식초로 양념한다.",
+      "descriptionEn": "Buckwheat noodles served in chilled soup made of dongchimi (radish kimchi) liquid and beef broth. This noodle dish is garnished with white radish and Asian pear slices and seasoned with mustard and vinegar."
+    },
+    {
+      "dishId": "16",
+      "nameKo": "비빔냉면",
+      "nameEn": "Spicy Buckwheat Noodles",
+      "classId": "C005",
+      "className": "Noodle Dishes",
+      "koreanCategory": "면 [Myeon]",
+      "allergens": [
+        "글루텐",
+        "대두"
+      ],
+      "vegetarianStatus": "부분채식",
+      "descriptionKo": "메밀로 만든 면을 삶아 찬물에 헹궈 물기를 뺀 다음 소고기 편육이나 홍어회무침, 무, 오이, 삶은 계란 등을 얹고 고추장 양념장에 비벼 차갑게 먹는 음식이다.",
+      "descriptionEn": "Chilled buckwheat noodles garnished with cold slices of beef, fresh skate, and radish or cucumber. Served with a spicy gochujang mixing sauce."
+    },
+    {
+      "dishId": "17",
+      "nameKo": "족발",
+      "nameEn": "Braised Pigs' Feet",
+      "classId": "C009",
+      "className": "Steamed Dishes",
+      "koreanCategory": "찜 [Jjim]",
+      "allergens": [
+        "대두"
+      ],
+      "vegetarianStatus": "비채식",
+      "descriptionKo": "돼지족에 간장과 생강, 마늘, 양파를 넣고 조려 먹기 좋게 썰어낸 음식이다. 족발에는 젤라틴 성분이 풍부하여 피부 미용과 노화 방지에 효과가 있다.",
+      "descriptionEn": "Pig's feet glazed in a soy sauce with ginger and garlic. Served off the bone and thinly sliced. The high gelatin content of jokbal helps to maintain a healthy and youthful complexion."
+    },
+    {
+      "dishId": "18",
+      "nameKo": "갈비탕",
+      "nameEn": "Short Rib Soup",
+      "classId": "C003",
+      "className": "Soup Dishes",
+      "koreanCategory": "탕 [Tang]",
+      "allergens": [],
+      "vegetarianStatus": "비채식",
+      "descriptionKo": "핏물을 뺀 소갈비를 무와 함께 푹 끓인 음식으로 맑은 국물이 구수하고 갈비를 뜯어 먹는 맛이 쏠쏠하다.",
+      "descriptionEn": "Beef ribs, soaked in cold water to remove the blood, and white radish chunks simmered together until tender. The clear stock is rich and savory, and the tender meat falls off the bone. (Glass noodles may be added.)"
+    },
+    {
+      "dishId": "19",
+      "nameKo": "감자탕",
+      "nameEn": "Pork Back-bone Stew",
+      "classId": "C003",
+      "className": "Soup Dishes",
+      "koreanCategory": "탕 [Tang]",
+      "allergens": [],
+      "vegetarianStatus": "비채식",
+      "descriptionKo": "돼지등뼈와 감자, 우거지, 들깻가루, 깻잎, 파, 마늘 등을 넣고 얼큰하게 끓인 탕이다. 깊고 구수한 맛을 내며 뼈에 붙은 고기를 빼먹는 맛이 또 다른 재미다.",
+      "descriptionEn": "A thick soup made of pig backbones, potato, green cabbage leaves (ugeoji), crushed perilla seeds, perilla leaves, spring onions, and garlic. A spicy dish with a deep and robust flavor."
+    },
+    {
+      "dishId": "20",
+      "nameKo": "김치볶음밥",
+      "nameEn": "Kimchi Fried Rice",
+      "classId": "C001",
+      "className": "Rice Dishes",
+      "koreanCategory": "밥 [Bap]",
+      "allergens": [
+        "대두"
+      ],
+      "vegetarianStatus": "부분채식",
+      "descriptionKo": "김치를 잘게 썰어 밥과 함께 프라이팬에 올린 뒤 볶은 음식이다. 식성에 따라 소고기나 돼지고기, 채소 등을 함께 넣고 볶아 먹는다.",
+      "descriptionEn": "Rice fried with finelychopped kimchi. Beef, pork, onions, green onions, and other vegetables may be added according to taste."
+    },
+    {
+      "dishId": "21",
+      "nameKo": "김치찌개",
+      "nameEn": "Kimchi Stew",
+      "classId": "C010",
+      "className": "Korean Stews",
+      "koreanCategory": "찌개 [Jjigae]",
+      "allergens": [
+        "대두"
+      ],
+      "vegetarianStatus": "부분채식",
+      "descriptionKo": "신김치를 이용한 국물요리다. 김치의 양념을 털어내고 돼지고기나 어패류, 두부, 굵게 썬 파 등을 함께 넣어 얼큰하게 끓인 음식이다.",
+      "descriptionEn": "A spicy stew made with sour kimchi, fatty pork, shellfish, and chunks of bean curd and green onion. It is served hot with steamed rice."
+    },
+    {
+      "dishId": "22",
+      "nameKo": "된장찌개",
+      "nameEn": "Soybean Paste Stew",
+      "classId": "C010",
+      "className": "Korean Stews",
+      "koreanCategory": "찌개 [Jjigae]",
+      "allergens": [
+        "대두"
+      ],
+      "vegetarianStatus": "부분채식",
+      "descriptionKo": "육수에 된장을 풀고 고기나 조개류, 두부, 애호박 등을 넣어 끓인 음식이다.국물이 걸쭉하고 여러 가지 재료가 어우러져 밥을 비벼 먹기에 좋다.",
+      "descriptionEn": "Doenjang-seasonedstew made with anchovy broth, fish or clams, and summer squash. The broth is thick and flavorful, and good for mixing with rice."
+    },
+    {
+      "dishId": "23",
+      "nameKo": "만두",
+      "nameEn": "Dumplings",
+      "classId": "C011",
+      "className": "Dumplings",
+      "koreanCategory": "만두 [Mandu]",
+      "allergens": [
+        "글루텐",
+        "대두"
+      ],
+      "vegetarianStatus": "부분채식",
+      "descriptionKo": "밀가루를 반죽해 얇게 민 다음 동그랗게 모양을 찍어 고기나 채소로 만든 소를 넣고 빚어 삶거나 찐 음식이다. 기름에 튀기거나 굽기도 한다.",
+      "descriptionEn": "Korean dumplings made of thinly rolled flour dough folded with a filling of ground meat and vegetables. Served boiled, steamed, deep-fried, or pan-fried."
+    },
+    {
+      "dishId": "24",
+      "nameKo": "보쌈",
+      "nameEn": "Kimchi Wraps with Pork",
+      "classId": "C009",
+      "className": "Steamed Dishes",
+      "koreanCategory": "찜 [Jjim]",
+      "allergens": [],
+      "vegetarianStatus": "비채식",
+      "descriptionKo": "삶은 돼지고기를 얇게 썰어 매콤하게 무친 무와 절인 배추에 함께 싸 먹는 음식이다. 새우젓을 찍어 배추김치나 보쌈김치 등에 싸먹기도 한다.",
+      "descriptionEn": "Boiled pork wrapped in cabbage leaves with a spicy relish made of sliced radish. The meat may also be dipped in salted shrimp sauce and wrapped in cabbage or bossamkimchi."
+    }
+    ]

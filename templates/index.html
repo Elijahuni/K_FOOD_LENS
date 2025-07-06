@@ -1,0 +1,1000 @@
+{% extends "base.html" %}
+
+{% block title %}K-FOOD LENS - Food recognition{% endblock %}
+
+{% block content %}
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <h1>Discover Korean Cuisine</h1>
+      <p class="hero-description">Identify Korean dishes with AI, check allergy information, and learn more about traditional foods.</p>
+      <a href="#upload-section" class="btn btn-primary btn-large">
+        <i class="bi bi-camera"></i> Start Recognition
+      </a>
+    </div>
+  </section>
+  <!-- Upload Section -->
+  <section id="upload-section" class="upload-section">
+    <div class="content-card">
+      <h2 class="section-heading">Food Recognition</h2>
+      <p class="section-description">Take a photo or upload an image to identify Korean food.</p>
+      {% if preview_image and not predictions %}
+        <div class="preview-container">
+          <div class="image-box">
+            <img src="{{ preview_image }}" alt="음식 이미지" class="preview-img">
+          </div>
+          <div class="action-buttons">
+            <form action="{{ url_for('main.predict') }}" method="post" enctype="multipart/form-data">
+              <input type="hidden" name="image_path" value="{{ image_path }}">
+              <button type="submit" class="btn btn-primary">Recognizing food</button>
+            </form>
+            <a href="{{ url_for('main.index') }}" class="btn btn-outline">Cancel</a>
+          </div>
+        </div>
+      {% elif predictions %}
+        <div class="preview-container">
+          {% if overlay_image_url %}
+          <div class="image-toggle-container">
+            <div class="toggle-buttons">
+              <button id="showOriginalBtn" class="btn btn-outline btn-sm active">OriginalImage</button>
+              <button id="showOverlayBtn" class="btn btn-outline btn-sm">Recognition Result Image</button>
+            </div>
+            <div class="image-container">
+              <img id="originalImage" src="{{ preview_image }}" alt="원본 이미지" class="preview-img">
+              <img id="overlayImage" src="{{ overlay_image_url }}" alt="인식 결과 이미지" class="preview-img" style="display: none;">
+            </div>
+            <a href="{{ url_for('main.index') }}" class="btn btn-outline btn-sm">Try Again with Another Image</a>
+          </div>
+
+          <script>
+            document.getElementById('showOriginalBtn').addEventListener('click', function() {
+              document.getElementById('originalImage').style.display = 'block';
+              document.getElementById('overlayImage').style.display = 'none';
+              this.classList.add('active');
+              document.getElementById('showOverlayBtn').classList.remove('active');
+            });
+
+            document.getElementById('showOverlayBtn').addEventListener('click', function() {
+              document.getElementById('originalImage').style.display = 'none';
+              document.getElementById('overlayImage').style.display = 'block';
+              this.classList.add('active');
+              document.getElementById('showOriginalBtn').classList.remove('active');
+            });
+          </script>
+        {% else %}
+          <div class="image-box">
+            <img src="{{ preview_image }}" alt="음식 이미지" class="preview-img">
+          </div>
+        {% endif %}
+        </div>
+      {% else %}
+        <form action="{{ url_for('main.upload') }}" method="post" enctype="multipart/form-data" id="upload-form">
+          <div class="upload-container">
+            <label for="file-input" class="upload-box">
+              <i class="bi bi-camera upload-icon"></i>
+              <p class="upload-text">Food photography or selection</p>
+              <p class="upload-description">AI automatically recognizes Korean food.</p>
+            </label>
+            <input type="file" id="file-input" name="file" accept="image/*" style="display: none;">
+          </div>
+        </form>
+      {% endif %}
+    </div>
+  </section>
+  
+  <!-- Recent Recognition Section (if user logged in) -->
+  {% if predictions %}
+  <section class="recent-section">
+    <h2 class="section-heading">Recognition Results</h2>
+    <div class="content-card">
+      {% for prediction in predictions %}
+        <div class="food-card">
+          <div class="food-card-header">
+            <div class="food-titles">
+              <h2 class="food-title">{{ prediction.food_info.nameKo }}</h2>
+              <h3 class="food-subtitle">{{ prediction.food_info.nameEn }}</h3>
+              <div class="confidence-badge">
+                Recognition accuracy: {{ (prediction.confidence * 100) | round | int }}%
+              </div>
+            </div>
+            <div class="food-image-preview" style="background-image: url('{{ preview_image }}');"></div>
+          </div>
+          
+          <div class="food-content">
+            <div class="food-details-grid">
+              <div class="food-detail-section">
+                <h4 class="detail-heading"><i class="bi bi-info-circle"></i> Basic Information</h4>
+                <p class="food-description">
+                  {{ prediction.food_info.descriptionEn }}
+                </p>
+                
+                <div class="food-warnings">
+                  {% if prediction.food_info.allergens %}
+                    <div class="allergen-section">
+                      <h5 class="allergen-title"><i class="bi bi-exclamation-triangle"></i> Allergy-causing ingredients:</h5>
+                      <div class="allergen-tags">
+                        {% for allergen in prediction.food_info.allergens %}
+                          <span class="allergen-tag">{{ allergen }}</span>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  {% endif %}
+                  
+                  <div class="vegetarian-status">
+                    <h5 class="vegetarian-title"><i class="bi bi-check-circle"></i> Vegetarian status:</h5>
+                    <span class="vegetarian-badge 
+                      {% if prediction.food_info.vegetarianStatus == '완전채식' %}vegetarian-full
+                      {% elif prediction.food_info.vegetarianStatus == '부분채식' %}vegetarian-partial
+                      {% else %}vegetarian-no{% endif %}">
+                      {{ prediction.food_info.vegetarianStatus }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="food-detail-section">
+                <h4 class="detail-heading"><i class="bi bi-basket"></i> Ingredients & Preparation</h4>
+                {% if prediction.food_info.ingredients %}
+                <div class="ingredients-section">
+                  <h5 class="ingredients-title">Main Ingredients:</h5>
+                  <ul class="ingredients-list">
+                    {% if prediction.food_info.ingredients is mapping %}
+                      <!-- If ingredients is an object with main, sub categories -->
+                      {% for ingredient in prediction.food_info.ingredients.main %}
+                        <li><span class="ingredient-item main-ingredient">{{ ingredient }}</span></li>
+                      {% endfor %}
+                      {% if prediction.food_info.ingredients.sub %}
+                        {% for ingredient in prediction.food_info.ingredients.sub %}
+                          <li><span class="ingredient-item sub-ingredient">{{ ingredient }}</span></li>
+                        {% endfor %}
+                      {% endif %}
+                    {% else %}
+                      <!-- If ingredients is a simple array -->
+                      {% for ingredient in prediction.food_info.ingredients %}
+                        <li><span class="ingredient-item">{{ ingredient }}</span></li>
+                      {% endfor %}
+                    {% endif %}
+                  </ul>
+                </div>
+                {% endif %}
+                
+                {% if prediction.food_info.cookingMethod %}
+                <div class="cooking-section">
+                  <h5 class="cooking-title">Cooking Method:</h5>
+                  {% if prediction.food_info.cookingMethod is string %}
+                    <p class="cooking-description">{{ prediction.food_info.cookingMethod }}</p>
+                  {% else %}
+                    <p class="cooking-description">
+                      Primary: {{ prediction.food_info.cookingMethod.primary }}
+                      {% if prediction.food_info.cookingMethod.secondary %}
+                        <br>Secondary: {{ prediction.food_info.cookingMethod.secondary|join(', ') }}
+                      {% endif %}
+                    </p>
+                  {% endif %}
+                </div>
+                {% endif %}
+                
+                {% if prediction.food_info.taste %}
+                <div class="taste-section">
+                  <h5 class="taste-title">Taste Profile:</h5>
+                  <div class="taste-grid">
+                    {% for key, value in prediction.food_info.taste.items() %}
+                      {% if key != 'profile' and (value is number) %}
+                        <div class="taste-item">
+                          <span class="taste-key">{{ key|capitalize }}</span>
+                          <div class="taste-meter">
+                            <div class="taste-level" style="width: {{ value * 20 }}%"></div>
+                          </div>
+                        </div>
+                      {% endif %}
+                    {% endfor %}
+                    
+                    {% if prediction.food_info.taste.profile %}
+                      <div class="taste-profile">
+                        <span class="profile-key">Flavor profile:</span>
+                        <span class="profile-value">{{ prediction.food_info.taste.profile|join(', ') }}</span>
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+                {% endif %}
+              </div>
+            </div>
+            
+            {% if prediction.food_info.similarFoods %}
+              <div class="recommendation-section">
+                <h4 class="detail-heading"><i class="bi bi-stars"></i> Similar Foods Recommendations</h4>
+                <div class="recommendation-tabs">
+                  {% if prediction.food_info.similarFoods.taste %}
+                    <button class="recommendation-tab active" data-tab="taste">Similar Taste</button>
+                  {% endif %}
+                  {% if prediction.food_info.similarFoods.ingredient %}
+                    <button class="recommendation-tab" data-tab="ingredient">Similar Ingredient</button>
+                  {% endif %}
+                  {% if prediction.food_info.similarFoods.cooking %}
+                    <button class="recommendation-tab" data-tab="cooking">Similar Cooking</button>
+                  {% endif %}
+                </div>
+                
+                <div class="recommendation-content">
+                  {% if prediction.food_info.similarFoods.taste %}
+                    <div class="recommendation-items" data-content="taste">
+                      <div class="recommendation-grid">
+                        {% for item in prediction.food_info.similarFoods.taste %}
+                          <div class="recommendation-card">
+                            <div class="recommendation-card-content">
+                              <h5 class="recommendation-name">{{ item.name }}</h5>
+                              <div class="recommendation-similarity">{{ (item.similarity * 100) | round | int }}% matched</div>
+                            </div>
+                          </div>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  {% endif %}
+                  
+                  {% if prediction.food_info.similarFoods.ingredient %}
+                    <div class="recommendation-items" data-content="ingredient" style="display: none;">
+                      <div class="recommendation-grid">
+                        {% for item in prediction.food_info.similarFoods.ingredient %}
+                          <div class="recommendation-card">
+                            <div class="recommendation-card-content">
+                              <h5 class="recommendation-name">{{ item.name }}</h5>
+                              <div class="recommendation-similarity">{{ (item.similarity * 100) | round | int }}% matched</div>
+                            </div>
+                          </div>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  {% endif %}
+                  
+                  {% if prediction.food_info.similarFoods.cooking %}
+                    <div class="recommendation-items" data-content="cooking" style="display: none;">
+                      <div class="recommendation-grid">
+                        {% for item in prediction.food_info.similarFoods.cooking %}
+                          <div class="recommendation-card">
+                            <div class="recommendation-card-content">
+                              <h5 class="recommendation-name">{{ item.name }}</h5>
+                              <div class="recommendation-similarity">{{ (item.similarity * 100) | round | int }}% matched</div>
+                            </div>
+                          </div>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+            {% endif %}
+            
+            {% if prediction.food_info.mealType or prediction.food_info.region %}
+              <div class="additional-info-section">
+                <h4 class="detail-heading"><i class="bi bi-info-circle-fill"></i> Additional Information</h4>
+                
+                {% if prediction.food_info.mealType %}
+                  <div class="meal-type-info">
+                    <h5 class="info-subtitle">Meal Type:</h5>
+                    <p>
+                      <strong>Primary:</strong> {{ prediction.food_info.mealType.primary }}
+                      {% if prediction.food_info.mealType.secondary %}
+                        <br><strong>Secondary:</strong> {{ prediction.food_info.mealType.secondary|join(', ') }}
+                      {% endif %}
+                      {% if prediction.food_info.mealType.occasion %}
+                        <br><strong>Occasions:</strong> {{ prediction.food_info.mealType.occasion|join(', ') }}
+                      {% endif %}
+                    </p>
+                  </div>
+                {% endif %}
+                
+                {% if prediction.food_info.region %}
+                  <div class="region-info">
+                    <h5 class="info-subtitle">Regional Information:</h5>
+                    <p>
+                      <strong>Origin:</strong> {{ prediction.food_info.region.origin }}
+                      {% if prediction.food_info.region.popular %}
+                        <br><strong>Popular in:</strong> {{ prediction.food_info.region.popular|join(', ') }}
+                      {% endif %}
+                      <br><strong>Traditional:</strong> {{ 'Yes' if prediction.food_info.region.traditional else 'No' }}
+                    </p>
+                  </div>
+                {% endif %}
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Features Section -->
+  <section class="features-section">
+    <h2 class="section-heading">Key Features</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <i class="bi bi-camera feature-icon"></i>
+        <h3>Food Recognition</h3>
+        <p>Identify Korean dishes with advanced AI technology</p>
+      </div>
+      <div class="feature-card">
+        <i class="bi bi-translate feature-icon"></i>
+        <h3>Menu Translation</h3>
+        <p>Translate Korean menus to English instantly</p>
+      </div>
+      <div class="feature-card">
+        <i class="bi bi-shield-check feature-icon"></i>
+        <h3>Allergy Information</h3>
+        <p>Check allergens and vegetarian status</p>
+      </div>
+      <div class="feature-card">
+        <i class="bi bi-book feature-icon"></i>
+        <h3>Recipe Details</h3>
+        <p>Learn about ingredients and cooking methods</p>
+      </div>
+    </div>
+  </section>
+  
+  <!-- How it works Section -->
+  <section class="how-it-works">
+    <h2 class="section-heading">How It Works</h2>
+    <div class="steps-container">
+      <div class="step">
+        <div class="step-number">1</div>
+        <i class="bi bi-cloud-upload step-icon"></i>
+        <h3>Upload Image</h3>
+        <p>Take a photo or upload an image of Korean food</p>
+      </div>
+      <div class="step">
+        <div class="step-number">2</div>
+        <i class="bi bi-cpu step-icon"></i>
+        <h3>AI Analysis</h3>
+        <p>Our AI identifies the dish and its ingredients</p>
+      </div>
+      <div class="step">
+        <div class="step-number">3</div>
+        <i class="bi bi-check-circle step-icon"></i>
+        <h3>Get Results</h3>
+        <p>View details, allergies, and recommendations</p>
+      </div>
+    </div>
+  </section>
+
+<style>
+  /* 유사 음식 추천 스타일 개선 */
+.recommendation-section {
+  margin-top: 30px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  padding-top: 30px;
+}
+
+.recommendation-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  padding-bottom: 5px;
+}
+
+.recommendation-tab {
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: 30px;
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.recommendation-tab.active {
+  background-color: var(--primary);
+  color: white;
+  border-color: var(--primary);
+  box-shadow: 0 3px 8px rgba(255, 74, 74, 0.3);
+}
+
+.recommendation-tab:hover:not(.active) {
+  background-color: #f2f2f2;
+  transform: translateY(-2px);
+}
+
+.recommendation-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  animation: fadeIn 0.3s ease;
+}
+
+.recommendation-card {
+  background-color: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border: 1px solid #eee;
+}
+
+.recommendation-card:hover {
+  transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  }
+  
+  .food-card-header {
+    display: flex;
+    padding: 24px 28px;
+    background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
+    color: white;
+  }
+  
+  .food-titles {
+    flex: 1;
+  }
+  
+  .food-title {
+    font-size: 2rem;
+    margin-bottom: 4px;
+    font-weight: 700;
+  }
+  
+  .food-subtitle {
+    font-size: 1.3rem;
+    margin-bottom: 12px;
+    opacity: 0.9;
+    font-weight: 500;
+  }
+  
+  .food-image-preview {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  .confidence-badge {
+    display: inline-block;
+    background-color: rgba(255, 255, 255, 0.25);
+    padding: 6px 16px;
+    border-radius: 30px;
+    font-size: 0.95rem;
+    margin-top: 5px;
+    backdrop-filter: blur(4px);
+  }
+  
+  .food-content {
+    padding: 28px;
+  }
+  
+  .food-details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    margin-bottom: 28px;
+  }
+  
+  @media (max-width: 768px) {
+    .food-details-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .food-card-header {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    
+    .food-image-preview {
+      margin-top: 20px;
+    }
+  }
+  
+  .food-detail-section {
+    background-color: #f8f9fa;
+    border-radius: 12px;
+    padding: 20px;
+  }
+  
+  .detail-heading {
+    color: var(--primary);
+    font-size: 1.2rem;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  
+  .food-description {
+    color: #444;
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+  
+  .food-warnings {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  
+  .allergen-section, .vegetarian-status {
+    flex: 1;
+    min-width: 200px;
+  }
+  
+  .allergen-title, .vegetarian-title, .ingredients-title, .cooking-title, .nutrition-title, .taste-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 1rem;
+    margin-bottom: 10px;
+    color: #444;
+  }
+  
+  .allergen-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .allergen-tag {
+    background-color: var(--primary);
+    color: white;
+    padding: 5px 12px;
+    border-radius: 30px;
+    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+  }
+  
+  .vegetarian-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  
+  .vegetarian-full {
+    background-color: var(--success);
+    color: white;
+  }
+  
+  .vegetarian-partial {
+    background-color: var(--warning);
+    color: #212529;
+  }
+  
+  .vegetarian-no {
+    background-color: var(--primary);
+    color: white;
+  }
+  
+  /* Ingredients & Preparation Styles */
+  .ingredients-section {
+    margin-bottom: 20px;
+  }
+  
+  .ingredients-list {
+    list-style-type: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 8px;
+  }
+  
+  .ingredient-item {
+    display: inline-block;
+    background-color: #e9ecef;
+    padding: 6px 12px;
+    border-radius: 6px;
+    color: #495057;
+    font-size: 0.9rem;
+  }
+  
+  .main-ingredient {
+    background-color: rgba(255, 74, 74, 0.1);
+    border-left: 3px solid var(--primary);
+  }
+  
+  .sub-ingredient {
+    background-color: rgba(76, 175, 80, 0.1);
+    border-left: 3px solid var(--success);
+  }
+  
+  .cooking-section {
+    margin-bottom: 20px;
+  }
+  
+  .cooking-description {
+    background-color: white;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 3px solid var(--primary);
+    color: #444;
+    line-height: 1.6;
+  }
+  
+  /* Taste meter styling */
+  .taste-section {
+    margin-top: 20px;
+  }
+  
+  .taste-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+  }
+  
+  .taste-item {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 8px;
+  }
+  
+  .taste-key {
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 4px;
+  }
+  
+  .taste-meter {
+    height: 8px;
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  
+  .taste-level {
+    height: 100%;
+    background-color: var(--primary);
+    border-radius: 4px;
+  }
+  
+  .taste-profile {
+    grid-column: 1 / -1;
+    margin-top: 10px;
+    border-top: 1px solid #eee;
+    padding-top: 10px;
+  }
+  
+  .profile-key {
+    font-weight: 500;
+    color: #555;
+    margin-right: 8px;
+  }
+  
+  .profile-value {
+    color: #666;
+  }
+  
+  /* Additional info section */
+  .additional-info-section {
+    margin-top: 24px;
+    border-top: 1px solid #eee;
+    padding-top: 24px;
+  }
+  
+  .info-subtitle {
+    color: #444;
+    margin-bottom: 8px;
+  }
+  
+  .meal-type-info,
+  .region-info {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 16px;
+  }
+  
+  .region-info {
+    margin-bottom: 0;
+  }
+  
+  /* Image toggle container */
+  .image-toggle-container {
+    margin-bottom: 24px;
+  }
+  
+  .toggle-buttons {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 12px;
+    gap: 10px;
+  }
+  
+  .btn-sm {
+    padding: 5px 10px;
+    font-size: 0.9rem;
+  }
+  
+  .btn-sm.active {
+    background-color: var(--primary);
+    color: white;
+  }
+  
+  .image-container {
+    position: relative;
+    max-height: 500px;
+    display: flex;
+    justify-content: center;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #ddd;
+  }
+  
+  /* Dark Mode Styles */
+  .dark-theme .food-card {
+    background-color: #2d3436;
+  }
+  
+  .dark-theme .food-detail-section {
+    background-color: #222831;
+  }
+  
+  .dark-theme .food-description,
+  .dark-theme .detail-heading,
+  .dark-theme .allergen-title,
+  .dark-theme .vegetarian-title,
+  .dark-theme .ingredients-title,
+  .dark-theme .cooking-title,
+  .dark-theme .nutrition-title,
+  .dark-theme .taste-title,
+  .dark-theme .info-subtitle {
+    color: #e0e0e0;
+  }
+  
+  .dark-theme .ingredient-item {
+    background-color: #3d3d3d;
+    color: #e0e0e0;
+  }
+  
+  .dark-theme .cooking-description {
+    background-color: #2d3436;
+    color: #e0e0e0;
+  }
+  
+  .dark-theme .taste-meter {
+    background-color: #444;
+  }
+  
+  .dark-theme .taste-key {
+    color: #ccc;
+  }
+  
+  .dark-theme .taste-profile {
+    border-top-color: #444;
+  }
+  
+  .dark-theme .profile-key {
+    color: #ccc;
+  }
+  
+  .dark-theme .profile-value,
+  .dark-theme .recommendation-name {
+    color: #e0e0e0;
+  }
+  
+  .dark-theme .recommendation-card {
+    background-color: #2d3436;
+  }
+  
+  .dark-theme .meal-type-info,
+  .dark-theme .region-info {
+    background-color: #333;
+  }
+  
+  .dark-theme .additional-info-section,
+  .dark-theme .recommendation-section {
+    border-top-color: #444;
+  }
+  
+  .dark-theme .image-container {
+    border-color: #444;
+  }
+  
+  .dark-theme .detail-heading {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  /* Animation */
+  @keyframes fadeIn {
+    0% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.recommendation-card-content {
+  padding: 15px;
+}
+
+.recommendation-name {
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.recommendation-similarity {
+  display: inline-block;
+  background-color: #f8f9fa;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  color: #495057;
+  font-weight: 500;
+}
+
+/* 다크 모드 스타일 */
+.dark-theme .recommendation-tab {
+  border-color: #444;
+  color: #ddd;
+}
+
+.dark-theme .recommendation-tab:hover:not(.active) {
+  background-color: #333;
+}
+
+.dark-theme .recommendation-card {
+  background-color: #333;
+  border-color: #444;
+}
+
+.dark-theme .recommendation-name {
+  color: #eee;
+}
+
+.dark-theme .recommendation-similarity {
+  background-color: #444;
+  color: #ddd;
+}
+
+  /* Enhanced Food Card Styles */
+  .food-card {
+    border-radius: 12px;
+    padding: 0;
+    margin-bottom: 30px;
+    background-color: white;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    opacity: 0; /* Start with 0 opacity for fade-in effect */
+    animation: fadeIn 0.5s ease forwards;
+  }
+  
+  .food-card:hover {
+    transform: translateY(-5px);
+  }
+</style>
+<script>
+  // Drag and drop functionality
+  const uploadBox = document.querySelector('.upload-box');
+  const fileInput = document.getElementById('file-input');
+  
+  if (uploadBox && fileInput) {
+    // 드래그 이벤트 핸들러 개선
+    uploadBox.addEventListener('dragenter', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      uploadBox.classList.add('drag-over');
+    });
+    
+    uploadBox.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!uploadBox.classList.contains('drag-over')) {
+        uploadBox.classList.add('drag-over');
+      }
+    });
+    
+    uploadBox.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      // 커서가 실제로 요소를 떠났는지 확인
+      const rect = uploadBox.getBoundingClientRect();
+      const x = e.clientX;
+      const y = e.clientY;
+      
+      // 커서가 실제로 요소 바깥으로 나갔을 때만 클래스 제거
+      if (x < rect.left || x >= rect.right || y < rect.top || y >= rect.bottom) {
+        uploadBox.classList.remove('drag-over');
+      }
+    });
+    
+    uploadBox.addEventListener('drop', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      uploadBox.classList.remove('drag-over');
+      
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        fileInput.files = files;
+        document.getElementById('upload-form').submit();
+      }
+    });
+    
+    // Also handle click on upload box
+    uploadBox.addEventListener('click', (e) => {
+      e.preventDefault();
+      fileInput.click();
+    });
+    
+    // Submit form when file is selected
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files.length > 0) {
+        document.getElementById('upload-form').submit();
+      }
+    });
+  }
+  
+  // 유사 음식 탭 기능 구현
+  document.addEventListener('DOMContentLoaded', function() {
+    // 모든 탭 버튼 찾기
+    const tabButtons = document.querySelectorAll('.recommendation-tab');
+    
+    // 각 탭 버튼에 이벤트 리스너 추가
+    tabButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        // 현재 탭 섹션 찾기 (상위 컨테이너)
+        const tabContainer = this.closest('.recommendation-section');
+        
+        // 모든 탭에서 active 클래스 제거
+        tabContainer.querySelectorAll('.recommendation-tab').forEach(tab => {
+          tab.classList.remove('active');
+        });
+        
+        // 클릭한 탭에 active 클래스 추가
+        this.classList.add('active');
+        
+        // 탭 데이터 속성 가져오기
+        const tabType = this.getAttribute('data-tab');
+        
+        // 모든 콘텐츠 영역 숨기기
+        tabContainer.querySelectorAll('.recommendation-items').forEach(content => {
+          content.style.display = 'none';
+        });
+        
+        // 선택한 탭에 해당하는 콘텐츠 표시
+        const selectedContent = tabContainer.querySelector(`.recommendation-items[data-content="${tabType}"]`);
+        if (selectedContent) {
+          selectedContent.style.display = 'block';
+        }
+        
+        console.log(`탭 클릭: ${tabType}`);
+      });
+    });
+    
+    // 페이지 로드 시 첫 번째 탭이 선택되어 있도록 설정
+    document.querySelectorAll('.recommendation-section').forEach(section => {
+      // 각 섹션의 첫 번째 탭 찾기
+      const firstTab = section.querySelector('.recommendation-tab');
+      if (firstTab) {
+        // 첫 번째 탭에 해당하는 콘텐츠 표시
+        const firstTabType = firstTab.getAttribute('data-tab');
+        const firstContent = section.querySelector(`.recommendation-items[data-content="${firstTabType}"]`);
+        if (firstContent) {
+          firstContent.style.display = 'block';
+        }
+      }
+    });
+    
+    // Fade-in animation for food cards
+    const foodCards = document.querySelectorAll('.food-card');
+    foodCards.forEach((card, index) => {
+      setTimeout(() => {
+        card.style.opacity = '1';
+      }, 100 * index);
+    });
+  });
+</script>
+{% endblock %}

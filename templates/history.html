@@ -1,0 +1,1232 @@
+<!--templates/history.html-->
+{% extends "base.html" %}
+
+{% block title %}K-FOOD LENS - Recognition History{% endblock %}
+
+{% block content %}
+<div class="content-card">
+  <div class="history-header">
+    <h2>Recognition History</h2>
+    
+    <div class="history-controls">
+      <div class="search-box">
+        <i class="bi bi-search"></i>
+        <input type="text" id="searchInput" placeholder="Search food...">
+      </div>
+      
+      <div class="view-toggle">
+        <button class="grid-view active" title="Grid view"><i class="bi bi-grid-3x3-gap-fill"></i></button>
+        <button class="list-view" title="List view"><i class="bi bi-list-ul"></i></button>
+      </div>
+      
+      <div class="sort-dropdown">
+        <button class="sort-button" id="sortButton">
+          <span>Sort by</span>
+          <i class="bi bi-chevron-down"></i>
+        </button>
+        <div class="sort-menu" id="sortMenu">
+          <div class="sort-item active" data-sort="date-desc">
+            <i class="bi bi-calendar-check"></i> Newest first
+          </div>
+          <div class="sort-item" data-sort="date-asc">
+            <i class="bi bi-calendar"></i> Oldest first
+          </div>
+          <div class="sort-item" data-sort="confidence-desc">
+            <i class="bi bi-bar-chart-fill"></i> Highest accuracy
+          </div>
+          <div class="sort-item" data-sort="confidence-asc">
+            <i class="bi bi-bar-chart"></i> Lowest accuracy
+          </div>
+          <div class="sort-item" data-sort="name-asc">
+            <i class="bi bi-sort-alpha-down"></i> Name (A-Z)
+          </div>
+          <div class="sort-item" data-sort="name-desc">
+            <i class="bi bi-sort-alpha-up"></i> Name (Z-A)
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  {% if not history or history|length == 0 %}
+    <div class="empty-state">
+      <i class="bi bi-camera empty-icon"></i>
+      <h3 class="empty-title">No recognition history yet</h3>
+      <p class="empty-description">Scan Korean food to create recognition history</p>
+      <a href="{{ url_for('main.index') }}" class="btn btn-primary">Start Food Recognition</a>
+    </div>
+  {% else %}
+    <div class="history-grid" id="historyGrid">
+      {% for item in history %}
+        <div class="history-card" 
+             data-timestamp="{{ item.timestamp.strftime('%Y%m%d%H%M%S') if item.timestamp else '0' }}" 
+             data-foodname="{% if item.detected_foods and item.detected_foods|length > 0 %}{{ item.detected_foods[0].nameEn or item.detected_foods[0].food_name }}{% else %}Unknown{% endif %}"
+             data-confidence="{% if item.detected_foods and item.detected_foods|length > 0 %}{{ item.detected_foods[0].confidence }}{% else %}0{% endif %}">
+          <!-- Recognition image -->
+          <div class="image-toggle-container">
+            {% if item.image_url %}
+              <img src="{{item.image_url}} " class="history-card-image" 
+              alt="{% if item.type == 'food' and item.detected_foods and item.detected_foods|length > 0 %}{{ item.detected_foods[0].nameKo or item.detected_foods[0].food_name }}{% else %}메뉴판 이미지{% endif %}"
+              onerror="this.src='{{ url_for('static', filename='images/image-placeholder.png') }}'; this.onerror='';">
+            {% else %}
+              <img src="{{ url_for('static', filename='images/image-placeholder.png') }}" class="history-card-image" 
+                  alt="이미지 없음">
+            {% endif %}
+          </div>
+          
+          <div class="history-card-content">
+            <div class="history-card-title">
+              <div class="food-name-container">
+                {% if item.detected_foods and item.detected_foods|length > 0 %}
+                  {% if item.detected_foods[0].nameKo and item.detected_foods[0].nameEn %}
+                    {{ item.detected_foods[0].nameKo }} / {{ item.detected_foods[0].nameEn }}
+                  {% elif item.detected_foods[0].nameKo %}
+                    {{ item.detected_foods[0].nameKo }}
+                  {% elif item.detected_foods[0].nameEn %}
+                    {{ item.detected_foods[0].nameEn }}
+                  {% else %}
+                    {{ item.detected_foods[0].food_name }}
+                  {% endif %}
+                  <span class="confidence-badge">{{ (item.detected_foods[0].confidence * 100) | round | int }}%</span>
+                {% else %}
+                  Unknown food
+                {% endif %}
+              </div>
+              <div class="card-actions">
+                <button class="action-btn favorite-btn" title="Add to favorites" data-id="{{ item._id }}">
+                  <i class="bi {% if item.is_favorite %}bi-star-fill{% else %}bi-star{% endif %}"></i>
+                </button>
+                <button class="action-btn share-btn" title="Share" data-id="{{ item._id }}" data-food-name="{% if item.detected_foods and item.detected_foods|length > 0 %}{{ item.detected_foods[0].nameEn or item.detected_foods[0].food_name }}{% else %}Unknown food{% endif %}">
+                  <i class="bi bi-share"></i>
+                </button>
+              </div>
+            </div>
+            
+            <div class="history-card-meta">
+              <i class="bi bi-calendar3"></i>
+              <span>{{ item.formatted_timestamp if item.formatted_timestamp else (item.timestamp.strftime('%Y-%m-%d %H:%M') if item.timestamp else 'Unknown date') }}</span>
+            </div>
+            
+            {% if item.detected_foods and item.detected_foods|length > 1 %}
+              <div class="food-tags">
+                {% for food in item.detected_foods[1:3] %}
+                  <span class="food-tag">
+                    {% if food.nameKo and food.nameEn %}
+                      {{ food.nameKo }} / {{ food.nameEn }} ({{ (food.confidence * 100) | round | int }}%)
+                    {% elif food.nameKo %}
+                      {{ food.nameKo }} ({{ (food.confidence * 100) | round | int }}%)
+                    {% elif food.nameEn %}
+                      {{ food.nameEn }} ({{ (food.confidence * 100) | round | int }}%)
+                    {% else %}
+                      {{ food.food_name }} ({{ (food.confidence * 100) | round | int }}%)
+                    {% endif %}
+                  </span>
+                {% endfor %}
+                {% if item.detected_foods|length > 3 %}
+                  <span class="food-tag">+{{ item.detected_foods|length - 3 }} more</span>
+                {% endif %}
+              </div>
+            {% endif %}
+            
+            <button class="expand-btn">
+              View details <i class="bi bi-chevron-down"></i>
+            </button>
+            
+            <div class="history-card-details">
+              {% if item.detected_foods and item.detected_foods|length > 0 %}
+                <div class="detail-item">
+                  <div class="detail-label">Korean Name</div>
+                  <div class="detail-value">{{ item.detected_foods[0].nameKo or 'Unknown' }}</div>
+                </div>
+                
+                <div class="detail-item">
+                  <div class="detail-label">English Name</div>
+                  <div class="detail-value">{{ item.detected_foods[0].nameEn or item.detected_foods[0].food_name }}</div>
+                </div>
+                
+                {% if item.detected_foods[0].allergens %}
+                  <div class="detail-item">
+                    <div class="detail-label">Allergens</div>
+                    <div class="allergen-list">
+                      {% for allergen in item.detected_foods[0].allergens %}
+                        <span class="allergen-tag">{{ allergen }}</span>
+                      {% endfor %}
+                    </div>
+                  </div>
+                {% endif %}
+                
+                <div class="detail-item">
+                  <div class="detail-label">Vegetarian Status</div>
+                  <div class="detail-value">
+                    <span class="vegetarian-badge-small 
+                      {% if item.detected_foods[0].vegetarianStatus == '완전채식' %}veg-full
+                      {% elif item.detected_foods[0].vegetarianStatus == '부분채식' %}veg-partial
+                      {% else %}veg-no{% endif %}">
+                      {% if item.detected_foods[0].vegetarianStatus == '완전채식' %}
+                        Vegetarian
+                      {% elif item.detected_foods[0].vegetarianStatus == '부분채식' %}
+                        Partially Vegetarian
+                      {% else %}
+                        Non-Vegetarian
+                      {% endif %}
+                    </span>
+                  </div>
+                </div>
+              {% endif %}
+              
+              <div class="detail-item">
+                <div class="detail-label">Recognition Time</div>
+                <div class="detail-value">{{ item.timestamp.strftime('%Y-%m-%d %H:%M:%S') if item.timestamp else 'Unknown time' }}</div>
+              </div>
+              
+              <div class="detail-actions">
+                <a href="{{ url_for('history.view_detail', record_id=item._id) }}" class="btn btn-outline btn-sm">Full Details</a>
+                <form method="post" action="{{ url_for('history.delete_record', record_id=item._id) }}" class="delete-form" onsubmit="return confirm('Are you sure you want to delete this record?');">
+                  <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+    
+    {% if pagination and pagination.total_pages > 1 %}
+      <div class="pagination">
+        <div class="pagination-item {% if not pagination.has_prev %}disabled{% endif %}" id="prevPage">
+          <i class="bi bi-chevron-left"></i>
+        </div>
+        
+        {% for page_num in range(1, pagination.total_pages + 1) %}
+          {% if page_num == pagination.page %}
+            <div class="pagination-item active">{{ page_num }}</div>
+          {% else %}
+            <a href="{{ url_for('history.index', page=page_num, type=filter_type, search=search_query) }}" class="pagination-item">{{ page_num }}</a>
+          {% endif %}
+        {% endfor %}
+        
+        <div class="pagination-item {% if not pagination.has_next %}disabled{% endif %}" id="nextPage">
+          <i class="bi bi-chevron-right"></i>
+        </div>
+      </div>
+    {% endif %}
+  {% endif %}
+</div>
+
+<!-- Share Modal -->
+<div id="shareModal" class="modal">
+  <div class="modal-content">
+    <span class="close-modal">&times;</span>
+    <h3 class="modal-title">Share this food</h3>
+    <div class="share-options">
+      <button class="share-option copy-link">
+        <i class="bi bi-link-45deg"></i>
+        Copy link
+      </button>
+      <a id="downloadImage" class="share-option download-image">
+        <i class="bi bi-download"></i>
+        Download image
+      </a>
+    </div>
+  </div>
+</div>
+<style>
+  .history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  
+  .history-controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  
+  .view-toggle {
+    display: flex;
+    background-color: #f0f0f0;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  
+  .view-toggle button {
+    border: none;
+    background: none;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .view-toggle button.active {
+    background-color: var(--primary);
+    color: white;
+  }
+  
+  .search-box {
+    position: relative;
+  }
+  
+  .search-box input {
+    padding: 8px 16px;
+    padding-left: 36px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    width: 200px;
+    transition: all 0.3s ease;
+  }
+  
+  .search-box input:focus {
+    width: 250px;
+    border-color: var(--primary);
+    outline: none;
+  }
+  
+  .search-box i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+  }
+  
+  .history-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .history-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+  }
+  
+  .history-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+  }
+  
+  .image-toggle-container {
+    position: relative;
+    width: 100%;
+    height: 180px;
+    overflow: hidden;
+  }
+  
+  .history-card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+  }
+  
+  .history-card-content {
+    padding: 16px;
+  }
+  
+  .history-card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .food-name-container {
+    max-width: 70%; /* 이름이 너무 길면 잘리도록 */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .card-actions {
+    display: flex;
+    gap: 8px;
+  }
+  
+  .action-btn {
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    transition: color 0.3s ease;
+    padding: 4px;
+  }
+  
+  .action-btn:hover {
+    color: var(--primary);
+  }
+  
+  .action-btn.favorite-btn i.bi-star-fill {
+    color: #FFC107;
+  }
+  
+  .confidence-badge {
+    background-color: var(--primary);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: normal;
+  }
+  
+  .history-card-meta {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .history-card-meta i {
+    font-size: 0.8rem;
+  }
+  
+  .food-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 8px;
+  }
+  
+  .food-tag {
+    background-color: #f0f0f0;
+    color: #666;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+  }
+  
+  .expand-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    width: 100%;
+    margin-top: 10px;
+    transition: all 0.3s ease;
+    padding: 8px 0;
+  }
+  
+  .expand-btn:hover {
+    background-color: rgba(255, 74, 74, 0.05);
+    border-radius: 4px;
+  }
+  
+  .expand-btn i {
+    margin-left: 5px;
+    transition: transform 0.3s ease;
+  }
+  
+  .history-card-details {
+    display: none;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #eee;
+    animation: fadeIn 0.3s ease;
+  }
+  
+  .detail-item {
+    margin-bottom: 12px;
+  }
+  
+  .detail-label {
+    font-weight: 500;
+    color: #444;
+    margin-bottom: 4px;
+  }
+  
+  .detail-value {
+    color: #666;
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+  
+  .allergen-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  
+  .allergen-tag {
+    background-color: var(--warning);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+  }
+  
+  .vegetarian-badge-small {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    color: white;
+  }
+  
+  .veg-full {
+    background-color: var(--success);
+  }
+  
+  .veg-partial {
+    background-color: var(--warning);
+  }
+  
+  .veg-no {
+    background-color: var(--primary);
+  }
+  
+  .detail-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 16px;
+  }
+  
+  .btn-sm {
+    padding: 5px 10px;
+    font-size: 0.9rem;
+  }
+  
+  .btn-danger {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+  }
+  
+  .btn-danger:hover {
+    background-color: #c82333;
+  }
+  
+  .pagination {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    margin-top: 30px;
+  }
+  
+  .pagination-item {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1px solid #ddd;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    color: inherit;
+  }
+  
+  .pagination-item:hover:not(.disabled) {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+  
+  .pagination-item.active {
+    background-color: var(--primary);
+    color: white;
+    border-color: var(--primary);
+  }
+  
+  .pagination-item.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .sort-dropdown {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .sort-button {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: none;
+    cursor: pointer;
+  }
+  
+  .sort-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    padding: 8px 0;
+    min-width: 200px;
+    display: none;
+    z-index: 100;
+  }
+  
+  .sort-menu.show {
+    display: block;
+    animation: fadeIn 0.2s ease;
+  }
+  
+  .sort-item {
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+  }
+  
+  .sort-item:hover {
+    background-color: #f5f5f5;
+  }
+  
+  .sort-item.active {
+    color: var(--primary);
+    font-weight: 500;
+    background-color: rgba(255, 74, 74, 0.05);
+  }
+  
+  .sort-item i {
+    margin-right: 8px;
+    font-size: 0.9rem;
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+  }
+  
+  .empty-icon {
+    font-size: 3.5rem;
+    color: #ddd;
+    margin-bottom: 16px;
+  }
+  
+  .empty-title {
+    font-size: 1.2rem;
+    color: #666;
+    margin-bottom: 8px;
+  }
+  
+  .empty-description {
+    color: #999;
+    margin-bottom: 24px;
+  }
+  
+  /* 모달 스타일 */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    overflow: auto;
+  }
+  
+  .modal-content {
+    background-color: #fff;
+    margin: 10% auto;
+    padding: 20px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    animation: slideIn 0.3s ease;
+    position: relative;
+  }
+  
+  @keyframes slideIn {
+    from {
+      transform: translateY(-20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  .modal-title {
+    color: var(--primary);
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .close-modal {
+    color: #aaa;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  
+  .close-modal:hover,
+  .close-modal:focus {
+    color: var(--primary);
+    text-decoration: none;
+  }
+  
+  .share-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .share-option {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px;
+    border-radius: 8px;
+    background-color: #f5f5f5;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    text-decoration: none;
+    color: #333;
+  }
+  
+  .share-option:hover {
+    background-color: #e9e9e9;
+    transform: translateY(-2px);
+  }
+  
+  .copy-link {
+    background-color: #f0f0f0;
+  }
+  
+  .copy-link:hover {
+    background-color: #e0e0e0;
+  }
+  
+  .download-image {
+    background-color: #4CAF50;
+    color: white;
+    text-align: center;
+  }
+  
+  .download-image:hover {
+    background-color: #3e8e41;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* 다크 모드 스타일 */
+  .dark-theme .history-card {
+    background-color: #333;
+  }
+  
+  .dark-theme .history-card-title {
+    color: #fff;
+  }
+  
+  .dark-theme .history-card-meta,
+  .dark-theme .detail-value {
+    color: #ccc;
+  }
+  
+  .dark-theme .detail-label {
+    color: #eee;
+  }
+  
+  .dark-theme .food-tag {
+    background-color: #444;
+    color: #ddd;
+  }
+  
+  .dark-theme .history-card-details {
+    border-top-color: #444;
+  }
+  
+  .dark-theme .expand-btn:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+  
+  .dark-theme .view-toggle {
+    background-color: #444;
+  }
+  
+  .dark-theme .sort-button {
+    border-color: #444;
+    color: #ddd;
+  }
+  
+  .dark-theme .sort-menu {
+    background-color: #333;
+    border: 1px solid #444;
+  }
+  
+  .dark-theme .sort-item:hover {
+    background-color: #444;
+  }
+  
+  .dark-theme .sort-item.active {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+  
+  .dark-theme .pagination-item {
+    border-color: #444;
+    color: #ddd;
+  }
+  
+  .dark-theme .search-box input {
+    background-color: #333;
+    border-color: #444;
+    color: #ddd;
+  }
+  
+  .dark-theme .empty-icon {
+    color: #444;
+  }
+  
+  .dark-theme .empty-title {
+    color: #ccc;
+  }
+  
+  .dark-theme .empty-description {
+    color: #999;
+  }
+  
+  .dark-theme .history-card-image {
+    border-bottom-color: #444;
+  }
+  
+  .dark-theme .modal-content {
+    background-color: #333;
+    color: #eee;
+  }
+  
+  .dark-theme .share-option {
+    background-color: #444;
+    color: #eee;
+  }
+  
+  .dark-theme .share-option:hover {
+    background-color: #555;
+  }
+  
+  .dark-theme .close-modal {
+    color: #ccc;
+  }
+  
+  .dark-theme .close-modal:hover {
+    color: #fff;
+  }
+
+  /* 반응형 스타일 */
+  @media (max-width: 768px) {
+    .history-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    
+    .history-controls {
+      width: 100%;
+      justify-content: space-between;
+    }
+    
+    .search-box input {
+      width: 180px;
+    }
+    
+    .search-box input:focus {
+      width: 200px;
+    }
+    
+    .history-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .history-controls {
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    
+    .search-box {
+      width: 100%;
+      order: 3;
+    }
+    
+    .search-box input, 
+    .search-box input:focus {
+      width: 100%;
+    }
+    
+    .sort-dropdown {
+      flex-grow: 1;
+    }
+    
+    .sort-button {
+      width: 100%;
+      justify-content: space-between;
+    }
+    
+    .card-actions {
+      gap: 4px;
+    }
+    
+    .action-btn {
+      padding: 2px;
+    }
+    
+    .modal-content {
+      margin: 20% auto;
+      width: 95%;
+    }
+  }
+</style>
+
+<!-- 히스토리 페이지 스크립트 -->
+<script>
+  // 페이지가 완전히 로드된 후 실행
+  document.addEventListener('DOMContentLoaded', function() {
+    // 상세 정보 토글 버튼
+    const expandButtons = document.querySelectorAll('.expand-btn');
+    expandButtons.forEach(function(button) {
+      button.addEventListener('click', function() {
+        const card = this.closest('.history-card');
+        const details = card.querySelector('.history-card-details');
+        
+        if (details.style.display === 'block') {
+          details.style.display = 'none';
+          this.innerHTML = '상세 정보 보기 <i class="bi bi-chevron-down"></i>';
+        } else {
+          details.style.display = 'block';
+          this.innerHTML = '상세 정보 숨기기 <i class="bi bi-chevron-up"></i>';
+        }
+      });
+    });
+    
+    // 이미지 클릭 시 상세 정보 토글
+    const cardImages = document.querySelectorAll('.history-card-image');
+    cardImages.forEach(function(image) {
+      image.addEventListener('click', function() {
+        const card = this.closest('.history-card');
+        const expandBtn = card.querySelector('.expand-btn');
+        expandBtn.click();
+      });
+    });
+    
+    // 즐겨찾기 버튼 기능
+    const favoriteButtons = document.querySelectorAll('.favorite-btn');
+    favoriteButtons.forEach(function(button) {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const icon = this.querySelector('i');
+        const itemId = this.getAttribute('data-id');
+        
+        // AJAX로 즐겨찾기 상태 서버에 저장
+        fetch('/history/toggle_favorite/' + itemId, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // 아이콘 변경
+            if (data.is_favorite) {
+              icon.classList.remove('bi-star');
+              icon.classList.add('bi-star-fill');
+            } else {
+              icon.classList.remove('bi-star-fill');
+              icon.classList.add('bi-star');
+            }
+          } else {
+            // 오류 발생
+            alert(data.error || '즐겨찾기 변경 중 오류가 발생했습니다.');
+          }
+        })
+        .catch(error => {
+          console.error('즐겨찾기 오류:', error);
+          alert('서버 연결 중 오류가 발생했습니다.');
+        });
+      });
+    });
+    
+    // 공유 모달
+    const shareModal = document.getElementById('shareModal');
+    const shareButtons = document.querySelectorAll('.share-btn');
+    const closeModal = document.querySelector('.close-modal');
+    
+    // 공유 버튼 클릭
+    shareButtons.forEach(function(button) {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // 이미지 정보 가져오기
+        const card = this.closest('.history-card');
+        const img = card.querySelector('.history-card-image');
+        const foodName = this.getAttribute('data-food-name');
+        const downloadLink = document.getElementById('downloadImage');
+        
+        if (downloadLink && img) {
+          downloadLink.href = img.src;
+          downloadLink.download = `kfood-${foodName.replace(/\s+/g, '-')}.jpg`;
+        }
+        
+        if (shareModal) {
+          shareModal.style.display = 'block';
+        }
+      });
+    });
+    
+    // 모달 닫기 버튼
+    if (closeModal) {
+      closeModal.addEventListener('click', function() {
+        shareModal.style.display = 'none';
+      });
+    }
+    
+    // 모달 외부 클릭시 닫기
+    window.addEventListener('click', function(event) {
+      if (event.target === shareModal) {
+        shareModal.style.display = 'none';
+      }
+    });
+    
+    // 링크 복사 기능
+    const copyLinkBtn = document.querySelector('.copy-link');
+    if (copyLinkBtn) {
+      copyLinkBtn.addEventListener('click', function() {
+        const url = window.location.href;
+        
+        navigator.clipboard.writeText(url).then(function() {
+          // 성공 메시지 표시
+          const originalText = copyLinkBtn.innerHTML;
+          copyLinkBtn.innerHTML = '<i class="bi bi-check"></i> 복사 완료!';
+          
+          // 3초 후 원래 텍스트로 복원
+          setTimeout(function() {
+            copyLinkBtn.innerHTML = originalText;
+          }, 3000);
+        }).catch(function() {
+          // 클립보드 API 미지원시 대체 방법
+          const tempInput = document.createElement('input');
+          tempInput.value = url;
+          document.body.appendChild(tempInput);
+          tempInput.select();
+          document.execCommand('copy');
+          document.body.removeChild(tempInput);
+          
+          const originalText = copyLinkBtn.innerHTML;
+          copyLinkBtn.innerHTML = '<i class="bi bi-check"></i> 복사 완료!';
+          
+          setTimeout(function() {
+            copyLinkBtn.innerHTML = originalText;
+          }, 3000);
+        });
+      });
+    }
+    
+    // 그리드/리스트 뷰 토글
+    const gridViewBtn = document.querySelector('.grid-view');
+    const listViewBtn = document.querySelector('.list-view');
+    const historyGrid = document.getElementById('historyGrid');
+    
+    if (gridViewBtn && listViewBtn && historyGrid) {
+      gridViewBtn.addEventListener('click', function() {
+        gridViewBtn.classList.add('active');
+        listViewBtn.classList.remove('active');
+        historyGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(280px, 1fr))';
+      });
+      
+      listViewBtn.addEventListener('click', function() {
+        listViewBtn.classList.add('active');
+        gridViewBtn.classList.remove('active');
+        historyGrid.style.gridTemplateColumns = '1fr';
+      });
+    }
+    
+    // 정렬 드롭다운 토글
+    const sortButton = document.getElementById('sortButton');
+    const sortMenu = document.getElementById('sortMenu');
+    
+    if (sortButton && sortMenu) {
+      sortButton.addEventListener('click', function(e) {
+        e.stopPropagation();
+        sortMenu.classList.toggle('show');
+      });
+      
+      // 외부 클릭 시 드롭다운 닫기
+      document.addEventListener('click', function(event) {
+        if (sortButton && sortMenu && !sortButton.contains(event.target) && !sortMenu.contains(event.target)) {
+          sortMenu.classList.remove('show');
+        }
+      });
+    }
+    
+    // 정렬 항목 클릭 - 정렬 기능
+    const sortItems = document.querySelectorAll('.sort-item');
+    if (sortItems) {
+      sortItems.forEach(function(item) {
+        item.addEventListener('click', function() {
+          // 활성 상태 토글
+          sortItems.forEach(function(itm) {
+            itm.classList.remove('active');
+          });
+          this.classList.add('active');
+          
+          // 정렬 유형에 따라 카드 정렬
+          const sortType = this.getAttribute('data-sort');
+          sortHistoryCards(sortType);
+          
+          // 드롭다운 닫기
+          sortMenu.classList.remove('show');
+          
+          // 정렬 버튼 텍스트 업데이트
+          const sortText = this.textContent.trim();
+          sortButton.querySelector('span').textContent = sortText;
+        });
+      });
+    }
+    
+    // 검색 기능
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+      searchInput.addEventListener('input', function() {
+        const searchText = this.value.toLowerCase();
+        const cards = document.querySelectorAll('.history-card');
+        let visibleCount = 0;
+        
+        cards.forEach(function(card) {
+          const foodName = card.getAttribute('data-foodname').toLowerCase();
+          if (foodName.includes(searchText)) {
+            card.style.display = '';
+            visibleCount++;
+          } else {
+            card.style.display = 'none';
+          }
+        });
+        
+        // 결과가 없으면 메시지 표시
+        const emptyMessage = document.getElementById('emptySearchResult');
+        if (visibleCount === 0 && searchText !== '') {
+          if (!emptyMessage) {
+            const historyGrid = document.getElementById('historyGrid');
+            const emptyDiv = document.createElement('div');
+            emptyDiv.id = 'emptySearchResult';
+            emptyDiv.className = 'empty-state';
+            emptyDiv.innerHTML = `
+              <i class="bi bi-search empty-icon"></i>
+              <h3 class="empty-title">검색 결과가 없습니다</h3>
+              <p class="empty-description">다른 검색어로 시도하거나 검색을 지워주세요.</p>
+              <button class="btn btn-outline" onclick="document.getElementById('searchInput').value=''; document.getElementById('searchInput').dispatchEvent(new Event('input'));">검색 지우기</button>
+            `;
+            historyGrid.insertAdjacentElement('afterend', emptyDiv);
+          }
+        } else if (emptyMessage) {
+          emptyMessage.remove();
+        }
+      });
+    }
+    
+    // 페이지네이션 기능
+    const prevPageBtn = document.getElementById('prevPage');
+    const nextPageBtn = document.getElementById('nextPage');
+    const pageItems = document.querySelectorAll('.pagination-item:not(#prevPage):not(#nextPage)');
+    
+    if (prevPageBtn && nextPageBtn && pageItems.length > 0) {
+      let currentPage = parseInt(new URLSearchParams(window.location.search).get('page')) || 1;
+      const totalPages = pageItems.length;
+      
+      // 이전 페이지 버튼
+      prevPageBtn.addEventListener('click', function() {
+        if (currentPage > 1) {
+          const params = new URLSearchParams(window.location.search);
+          params.set('page', currentPage - 1);
+          window.location.href = window.location.pathname + '?' + params.toString();
+        }
+      });
+      
+      // 다음 페이지 버튼
+      nextPageBtn.addEventListener('click', function() {
+        if (currentPage < totalPages) {
+          const params = new URLSearchParams(window.location.search);
+          params.set('page', currentPage + 1);
+          window.location.href = window.location.pathname + '?' + params.toString();
+        }
+      });
+    }
+    
+    // 히스토리 카드 정렬 함수
+    function sortHistoryCards(sortType) {
+      const historyGrid = document.getElementById('historyGrid');
+      if (!historyGrid) return;
+      
+      const cards = Array.from(historyGrid.querySelectorAll('.history-card'));
+      if (cards.length === 0) return;
+      
+      // 정렬 기준에 따라 카드 정렬
+      cards.sort(function(a, b) {
+        switch(sortType) {
+          case 'date-desc': // 최신순
+            return parseInt(b.getAttribute('data-timestamp')) - parseInt(a.getAttribute('data-timestamp'));
+          
+          case 'date-asc': // 오래된순
+            return parseInt(a.getAttribute('data-timestamp')) - parseInt(b.getAttribute('data-timestamp'));
+          
+          case 'confidence-desc': // 인식률 높은순
+            return parseFloat(b.getAttribute('data-confidence')) - parseFloat(a.getAttribute('data-confidence'));
+          
+          case 'confidence-asc': // 인식률 낮은순
+            return parseFloat(a.getAttribute('data-confidence')) - parseFloat(b.getAttribute('data-confidence'));
+          
+          case 'name-asc': // 이름 오름차순
+            return a.getAttribute('data-foodname').localeCompare(b.getAttribute('data-foodname'));
+          
+          case 'name-desc': // 이름 내림차순
+            return b.getAttribute('data-foodname').localeCompare(a.getAttribute('data-foodname'));
+          
+          default:
+            return 0;
+        }
+      });
+      
+      // 정렬된 카드를 DOM에 다시 추가
+      cards.forEach(function(card) {
+        historyGrid.appendChild(card);
+      });
+    }
+    
+    // 페이지 로드 시 기본 정렬 적용 (최신순)
+    sortHistoryCards('date-desc');
+  });
+</script>
+{% endblock %}

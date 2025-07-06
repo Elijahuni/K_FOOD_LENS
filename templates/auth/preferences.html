@@ -1,0 +1,569 @@
+<!--templates/auth/preferences.html-->
+{% extends "base.html" %}
+
+{% block title %}K-FOOD LENS - Food Preferences{% endblock %}
+
+{% block content %}
+<div class="content-card">
+  <h2 class="section-heading">Food Preferences Settings</h2>
+  <p class="section-description">Your allergy information and dietary preferences will be applied to food recognition results.</p>
+  
+  <form method="post" action="{{ url_for('auth.preferences') }}" class="preferences-form">
+    <div class="form-section">
+      <div class="form-header">
+        <div class="form-icon"><i class="bi bi-exclamation-triangle"></i></div>
+        <div>
+          <h3 class="form-heading">Allergen Information</h3>
+          <p class="form-description">Select all allergens that apply to you. We'll highlight these in recognition results.</p>
+        </div>
+      </div>
+      
+      <div class="checkbox-group">
+        {% for allergen in allergen_options %}
+        <div class="form-check-container">
+          <div class="form-check custom-checkbox">
+            <input type="checkbox" id="allergen-{{ allergen.id }}" name="allergens" value="{{ allergen.id }}" 
+                   class="form-check-input" {% if allergen.id in user.preferences.allergens|default([]) %}checked{% endif %}>
+            <label for="allergen-{{ allergen.id }}" class="form-check-label">
+              <span class="check-icon"></span>
+              <span class="label-text">{{ allergen.name }}</span>
+            </label>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    
+    <div class="form-section">
+      <div class="form-header">
+        <div class="form-icon"><i class="bi bi-flower1"></i></div>
+        <div>
+          <h3 class="form-heading">Vegetarian Preference</h3>
+          <p class="form-description">Indicate if you follow a vegetarian diet so we can highlight suitable foods.</p>
+        </div>
+      </div>
+      
+      <div class="toggle-switch-container">
+        <label class="toggle-switch" for="vegetarian">
+          <input type="checkbox" id="vegetarian" name="vegetarian" 
+                 {% if user.preferences.vegetarian|default(false) %}checked{% endif %}>
+          <span class="toggle-slider"></span>
+        </label>
+        <span class="toggle-label">I am vegetarian</span>
+      </div>
+    </div>
+    
+    <div class="form-section">
+      <div class="form-header">
+        <div class="form-icon"><i class="bi bi-tag"></i></div>
+        <div>
+          <h3 class="form-heading">Preferred Food Categories</h3>
+          <p class="form-description">Select food categories you like to help us provide better recommendations.</p>
+        </div>
+      </div>
+      
+      <div class="checkbox-group">
+        {% for category in category_options %}
+        <div class="form-check-container">
+          <div class="form-check custom-checkbox">
+            <input type="checkbox" id="category-{{ category.id }}" name="preferred_categories" value="{{ category.id }}" 
+                   class="form-check-input" {% if category.id in user.preferences.preferred_categories|default([]) %}checked{% endif %}>
+            <label for="category-{{ category.id }}" class="form-check-label">
+              <span class="check-icon"></span>
+              <span class="label-text">{{ category.name }}</span>
+            </label>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    
+    <div class="form-section spicy-preference">
+      <div class="form-header">
+        <div class="form-icon"><i class="bi bi-fire"></i></div>
+        <div>
+          <h3 class="form-heading">Spiciness Preference</h3>
+          <p class="form-description">Adjust the slider to indicate your preferred level of spiciness.</p>
+        </div>
+      </div>
+      
+      <div class="range-slider-container">
+        <div class="range-slider">
+          <input type="range" id="spicy-level" name="spicy_level" min="0" max="5" step="1"
+                 value="{{ user.preferences.spicy_level|default(3) }}" class="form-range">
+          <div class="range-track">
+            <div class="range-fill" id="range-fill"></div>
+          </div>
+          <div class="range-labels">
+            <span>Not Spicy</span>
+            <span>Medium</span>
+            <span>Very Spicy</span>
+          </div>
+        </div>
+        <div class="spicy-level-display">
+          Selected: <span id="spicy-level-text" class="spicy-level-value">
+            {% set spicy = user.preferences.spicy_level|default(3) %}
+            {% if spicy == 0 %}Not spicy at all
+            {% elif spicy == 1 %}Slightly mild
+            {% elif spicy == 2 %}Mild
+            {% elif spicy == 3 %}Medium spicy
+            {% elif spicy == 4 %}Spicy
+            {% elif spicy == 5 %}Very spicy
+            {% endif %}
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Save Preferences</button>
+      <a href="{{ url_for('auth.profile') }}" class="btn btn-outline">Cancel</a>
+    </div>
+  </form>
+</div>
+
+<style>
+  .preferences-form {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 16px 0;
+  }
+  
+  .form-section {
+    margin-bottom: 40px;
+    border-radius: 12px;
+    padding: 25px;
+    background-color: #f8f9fa;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .dark-theme .form-section {
+    background-color: #333;
+  }
+  
+  .form-section:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .form-header {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 20px;
+  }
+  
+  .form-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: rgba(255, 74, 74, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    color: var(--primary);
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+  
+  .form-heading {
+    color: var(--primary);
+    font-size: 1.3rem;
+    margin: 0 0 8px 0;
+    font-weight: 600;
+  }
+  
+  .form-description {
+    color: #666;
+    font-size: 0.95rem;
+    margin: 0;
+    line-height: 1.5;
+  }
+  
+  .dark-theme .form-description {
+    color: #aaa;
+  }
+  
+  /* Custom Checkbox Styling */
+  .checkbox-group {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin: 20px 0 10px;
+  }
+  
+  .form-check-container {
+    background-color: white;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    border: 1px solid #e0e0e0;
+  }
+  
+  .dark-theme .form-check-container {
+    background-color: #444;
+    border-color: #555;
+  }
+  
+  .form-check-container:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+  }
+  
+  .custom-checkbox {
+    padding: 12px 15px;
+    cursor: pointer;
+    width: 100%;
+  }
+  
+  .custom-checkbox input[type="checkbox"] {
+    display: none;
+  }
+  
+  .custom-checkbox .form-check-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+  }
+  
+  .check-icon {
+    width: 22px;
+    height: 22px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    margin-right: 10px;
+    position: relative;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+  }
+  
+  .dark-theme .check-icon {
+    border-color: #666;
+  }
+  
+  .custom-checkbox input[type="checkbox"]:checked + .form-check-label .check-icon {
+    background-color: var(--primary);
+    border-color: var(--primary);
+  }
+  
+  .custom-checkbox input[type="checkbox"]:checked + .form-check-label .check-icon::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 7px;
+    width: 6px;
+    height: 11px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+  
+  .label-text {
+    font-size: 1rem;
+    color: #444;
+  }
+  
+  .dark-theme .label-text {
+    color: #ddd;
+  }
+  
+  /* Toggle Switch Styling */
+  .toggle-switch-container {
+    display: flex;
+    align-items: center;
+    margin: 20px 0;
+    background-color: white;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+  }
+  
+  .dark-theme .toggle-switch-container {
+    background-color: #444;
+    border-color: #555;
+  }
+  
+  .toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 30px;
+    margin-right: 15px;
+  }
+  
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+  }
+  
+  .toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+  }
+  
+  input:checked + .toggle-slider {
+    background-color: #4CAF50;
+  }
+  
+  input:checked + .toggle-slider:before {
+    transform: translateX(30px);
+  }
+  
+  .toggle-label {
+    font-size: 1rem;
+    color: #444;
+  }
+  
+  .dark-theme .toggle-label {
+    color: #ddd;
+  }
+  
+  /* Range Slider Styling */
+  .range-slider-container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+    border: 1px solid #e0e0e0;
+  }
+  
+  .dark-theme .range-slider-container {
+    background-color: #444;
+    border-color: #555;
+  }
+  
+  .range-slider {
+    position: relative;
+    margin-bottom: 25px;
+  }
+  
+  .form-range {
+    width: 100%;
+    height: 10px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    margin: 10px 0 5px;
+    position: relative;
+    z-index: 2;
+  }
+  
+  .range-track {
+    position: absolute;
+    top: 18px;
+    left: 0;
+    width: 100%;
+    height: 6px;
+    background-color: #ddd;
+    border-radius: 3px;
+    z-index: 1;
+  }
+  
+  .dark-theme .range-track {
+    background-color: #555;
+  }
+  
+  .range-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background-color: var(--primary);
+    border-radius: 3px;
+    width: 60%; /* Will be updated by JS */
+  }
+  
+  .form-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--primary);
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+  }
+  
+  .form-range::-moz-range-thumb {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--primary);
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    border: none;
+    transition: all 0.2s ease;
+  }
+  
+  .form-range::-webkit-slider-thumb:hover {
+    box-shadow: 0 0 0 8px rgba(255, 74, 74, 0.1);
+  }
+  
+  .form-range::-moz-range-thumb:hover {
+    box-shadow: 0 0 0 8px rgba(255, 74, 74, 0.1);
+  }
+  
+  .range-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 8px;
+  }
+  
+  .dark-theme .range-labels {
+    color: #aaa;
+  }
+  
+  .spicy-level-display {
+    margin-top: 15px;
+    font-size: 1rem;
+    color: #444;
+    text-align: center;
+  }
+  
+  .dark-theme .spicy-level-display {
+    color: #ddd;
+  }
+  
+  .spicy-level-value {
+    color: var(--primary);
+    font-weight: 500;
+  }
+  
+  /* Form Actions */
+  .form-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 40px;
+    justify-content: center;
+  }
+  
+  .btn {
+    padding: 12px 25px;
+    font-size: 1rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+  }
+  
+  .btn-primary {
+    background-color: var(--primary);
+    color: white;
+    border: none;
+  }
+  
+  .btn-primary:hover {
+    background-color: #e03d3d;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(255, 74, 74, 0.3);
+  }
+  
+  .btn-outline {
+    background-color: transparent;
+    color: #666;
+    border: 1px solid #ddd;
+  }
+  
+  .dark-theme .btn-outline {
+    color: #ddd;
+    border-color: #555;
+  }
+  
+  .btn-outline:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    transform: translateY(-2px);
+  }
+  
+  /* Responsive Adjustments */
+  @media (max-width: 768px) {
+    .form-section {
+      padding: 20px;
+    }
+    
+    .checkbox-group {
+      grid-template-columns: 1fr;
+    }
+    
+    .form-actions {
+      flex-direction: column;
+    }
+    
+    .btn {
+      width: 100%;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const spicyLevelInput = document.getElementById('spicy-level');
+    const spicyLevelText = document.getElementById('spicy-level-text');
+    const rangeFill = document.getElementById('range-fill');
+    
+    // Initial setup
+    updateRange(spicyLevelInput.value);
+    updateSpicyLevelText(spicyLevelInput.value);
+    
+    // Change events
+    spicyLevelInput.addEventListener('input', function() {
+      updateRange(this.value);
+      updateSpicyLevelText(this.value);
+    });
+    
+    function updateRange(value) {
+      // Calculate percentage for range fill
+      const percent = (value / 5) * 100;
+      rangeFill.style.width = `${percent}%`;
+    }
+    
+    function updateSpicyLevelText(value) {
+      const levels = [
+        'Not spicy at all',
+        'Slightly mild',
+        'Mild',
+        'Medium spicy',
+        'Spicy',
+        'Very spicy'
+      ];
+      
+      spicyLevelText.textContent = levels[value];
+      
+      // Update color based on spice level
+      const colors = [
+        '#4CAF50', // Green for not spicy
+        '#8BC34A',
+        '#CDDC39',
+        '#FFC107',
+        '#FF9800',
+        '#FF5722'  // Red for very spicy
+      ];
+      
+      spicyLevelText.style.color = colors[value];
+    }
+  });
+</script>
+{% endblock %}

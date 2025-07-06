@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+
+{% block title %}K-FOOD LENS - Food Detail{% endblock %}
+
+{% block content %}
+<div class="content-card">
+  <div class="detail-header">
+    <div class="back-link">
+      <a href="{{ url_for('history.index') }}" class="btn-back">
+        <i class="bi bi-arrow-left"></i> Back to history
+      </a>
+    </div>
+    <h2 class="detail-title">Recognition Details</h2>
+  </div>
+
+  {% if record %}
+    <div class="detail-container">
+      <div class="image-section">
+        <div class="detail-image-container">
+          {% if record.overlay_image_path %}
+            <img src="{{ url_for('static', filename='uploads/results/' + record.overlay_image_path.split('/')[-1]) }}" class="detail-image" 
+                alt="{% if record.detected_foods and record.detected_foods|length > 0 %}{{ record.detected_foods[0].nameEn or record.detected_foods[0].food_name }}{% else %}Unknown food{% endif %}"
+                onerror="this.src='{{ url_for('static', filename='uploads/' + record.image_path.split('/')[-1]) }}'; this.onerror='';">
+          {% else %}
+            <img src="{{ record.image_url|default(url_for('static', filename='uploads/' + record.image_path.split('/')[-1])) }}" class="detail-image" 
+                alt="{% if record.detected_foods and record.detected_foods|length > 0 %}{{ record.detected_foods[0].nameEn or record.detected_foods[0].food_name }}{% else %}Unknown food{% endif %}"
+                onerror="this.src='{{ url_for('static', filename='images/image-placeholder.png') }}'; this.onerror='';">
+          {% endif %}
+        </div>
+        <div class="image-meta">
+          <div class="meta-item">
+            <i class="bi bi-calendar3"></i>
+            <span>{{ record.timestamp.strftime('%Y-%m-%d %H:%M:%S') if record.timestamp else 'Unknown time' }}</span>
+          </div>
+          <div class="image-actions">
+            <button class="action-btn favorite-btn" title="Add to favorites" data-id="{{ record._id }}">
+              <i class="bi {% if record.is_favorite %}bi-star-fill{% else %}bi-star{% endif %}"></i>
+              <span>{% if record.is_favorite %}Remove from favorites{% else %}Add to favorites{% endif %}</span>
+            </button>
+            <button class="action-btn share-btn" title="Share" data-id="{{ record._id }}" data-food-name="{% if record.detected_foods and record.detected_foods|length > 0 %}{{ record.detected_foods[0].nameEn or record.detected_foods[0].food_name }}{% else %}Unknown food{% endif %}">
+              <i class="bi bi-share"></i>
+              <span>Share</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {% if record.detected_foods and record.detected_foods|length > 0 %}
+        <div class="food-details-section">
+          <h3 class="section-title">
+            {% if record.detected_foods[0].nameKo and record.detected_foods[0].nameEn %}
+              {{ record.detected_foods[0].nameKo }} / {{ record.detected_foods[0].nameEn }}
+            {% elif record.detected_foods[0].nameKo %}
+              {{ record.detected_foods[0].nameKo }}
+            {% elif record.detected_foods[0].nameEn %}
+              {{ record.detected_foods[0].nameEn }}
+            {% else %}
+              {{ record.detected_foods[0].food_name }}
+            {% endif %}
+            <span class="confidence-badge-large">{{ (record.detected_foods[0].confidence * 100) | round | int }}% Confidence</span>
+          </h3>
+
+          <div class="info-grid">
+            <div class="info-card">
+              <h4 class="info-title"><i class="bi bi-info-circle"></i> Basic Information</h4>
+              <div class="info-content">
+                <div class="info-row">
+                  <div class="info-label">Korean Name</div>
+                  <div class="info-value">{{ record.detected_foods[0].nameKo or 'Unknown' }}</div>
+                </div>
+                <div class="info-row">
+                  <div class="info-label">English Name</div>
+                  <div class="info-value">{{ record.detected_foods[0].nameEn or record.detected_foods[0].food_name }}</div>
+                </div>
+                <div class="info-row">
+                  <div class="info-label">Category</div>
+                  <div class="info-value">{{ record.detected_foods[0].food_info.className if record.detected_foods[0].food_info and record.detected_foods[0].food_info.className else 'Unknown' }}</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="info-card">
+              <h4 class="info-title"><i class="bi bi-exclamation-triangle"></i> Dietary Information</h4>
+              <div class="info-content">
+                <div class="info-row">
+                  <div class="info-label">Vegetarian Status</div>
+                  <div class="info-value">
+                    <span class="vegetarian-badge 
+                      {% if record.detected_foods[0].vegetarianStatus == '완전채식' %}vegetarian-full
+                      {% elif record.detected_foods[0].vegetarianStatus == '부분채식' %}vegetarian-partial
+                      {% else %}vegetarian-no{% endif %}">
+                      {% if record.detected_foods[0].vegetarianStatus == '완전채식' %}
+                        Vegetarian
+                      {% elif record.detected_foods[0].vegetarianStatus == '부분채식' %}
+                        Partially Vegetarian
+                      {% else %}
+                        Non-Vegetarian
+                      {% endif %}
+                    </span>
+                  </div>
+                </div>
+
+                {% if record.detected_foods[0].allergens %}
+                  <div class="info-row">
+                    <div class="info-label">Allergens</div>
+                    <div class="info-value allergen-container">
+                      {% for allergen in record.detected_foods[0].allergens %}
+                        <span class="allergen-tag">{{ allergen }}</span>
+                      {% endfor %}
+                    </div>
+                  </div>
+                {% else %}
+                  <div class="info-row">
+                    <div class="info-label">Allergens</div>
+                    <div class="info-value">No allergen information available</div>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+
+            {% if record.detected_foods[0].food_info and record.detected_foods[0].food_info.descriptionEn %}
+              <div class="info-card full-width">
+                <h4 class="info-title"><i class="bi bi-book"></i> Description</h4>
+                <div class="info-content">
+                  <p class="food-description">{{ record.detected_foods[0].food_info.descriptionEn }}</p>
+                  {% if record.detected_foods[0].food_info.descriptionKo %}
+                    <p class="food-description-ko">{{ record.detected_foods[0].food_info.descriptionKo }}</p>
+                  {% endif %}
+                </div>
+              </div>
+            {% endif %}
+
+            {% if record.detected_foods[0].food_info and record.detected_foods[0].food_info.ingredients %}
+              <div class="info-card">
+                <h4 class="info-title"><i class="bi bi-basket"></i> Ingredients</h4>
+                <div class="info-content">
+                  {% if record.detected_foods[0].food_info.ingredients.main %}
+                    <div class="info-row">
+                      <div class="info-label">Main</div>
+                      <div class="info-value ingredient-tags">
+                        {% for ingredient in record.detected_foods[0].food_info.ingredients.main %}
+                          <span class="ingredient-tag main-ingredient">{{ ingredient }}</span>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  {% endif %}
+                  
+                  {% if record.detected_foods[0].food_info.ingredients.sub %}
+                    <div class="info-row">
+                      <div class="info-label">Secondary</div>
+                      <div class="info-value ingredient-tags">
+                        {% for ingredient in record.detected_foods[0].food_info.ingredients.sub %}
+                          <span class="ingredient-tag sub-ingredient">{{ ingredient }}</span>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  {% endif %}
+                  
+                  {% if record.detected_foods[0].food_info.ingredients.sauce %}
+                    <div class="info-row">
+                      <div class="info-label">Sauce/Seasoning</div>
+                      <div class="info-value ingredient-tags">
+                        {% for ingredient in record.detected_foods[0].food_info.ingredients.sauce %}
+                          <span class="ingredient-tag sauce-ingredient">{{ ingredient }}</span>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+            {% endif %}
+
+            {% if record.detected_foods[0].food_info and record.detected_foods[0].food_info.taste %}
+              <div class="info-card">
+                <h4 class="info-title"><i class="bi bi-star"></i> Taste Profile</h4>
+                <div class="info-content">
+                  <div class="taste-meters">
+                    {% for taste, level in record.detected_foods[0].food_info.taste.items() %}
+                      {% if taste != 'profile' and level is number %}
+                        <div class="taste-item">
+                          <div class="taste-label">{{ taste|capitalize }}</div>
+                          <div class="taste-meter">
+                            <div class="taste-level" style="width: {{ level * 20 }}%"></div>
+                          </div>
+                          <div class="taste-value">{{ level }}/5</div>
+                        </div>
+                      {% endif %}
+                    {% endfor %}
+                  </div>
+                  
+                  {% if record.detected_foods[0].food_info.taste.profile %}
+                    <div class="taste-profile">
+                      <div class="info-label">Flavor Profile:</div>
+                      <div class="profile-tags">
+                        {% for profile in record.detected_foods[0].food_info.taste.profile %}
+                          <span class="profile-tag">{{ profile }}</span>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        {% if record.detected_foods|length > 1 %}
+          <div class="additional-foods-section">
+            <h3 class="section-title">Other Detected Foods</h3>
+            <div class="food-cards-container">
+              {% for food in record.detected_foods[1:] %}
+                <div class="additional-food-card">
+                  <div class="food-card-title">
+                    {% if food.nameKo and food.nameEn %}
+                      {{ food.nameKo }} / {{ food.nameEn }}
+                    {% elif food.nameKo %}
+                      {{ food.nameKo }}
+                    {% elif food.nameEn %}
+                      {{ food.nameEn }}
+                    {% else %}
+                      {{ food.food_name }}
+                    {% endif %}
+                  </div>
+                  <div class="food-card-confidence">
+                    <div class="confidence-meter">
+                      <div class="confidence-level" style="width: {{ food.confidence * 100 }}%"></div>
+                    </div>
+                    <span>{{ (food.confidence * 100) | round | int }}%</span>
+                  </div>
+                  {% if food.allergens %}
+                    <div class="food-card-allergens">
+                      {% for allergen in food.allergens %}
+                        <span class="allergen-tag-small">{{ allergen }}</span>
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+        
+      {% else %}
+        <div class="no-food-info">
+          <i class="bi bi-exclamation-circle"></i>
+          <h3>No food information available</h3>
+          <p>No detected foods were found in this record.</p>
+        </div>
+      {% endif %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <i class="bi bi-exclamation-circle empty-icon"></i>
+      <h3 class="empty-title">Record not found</h3>
+      <p class="empty-description">The requested recognition record could not be found.</p>
+      <a href="{{ url_for('history.index') }}" class="btn btn-primary">Back to History</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

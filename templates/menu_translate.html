@@ -1,0 +1,535 @@
+<!--templates/menu_translate.html-->
+{% extends "base.html" %}
+
+{% block title %}K-FOOD LENS - Translation of the menu{% endblock %}
+
+{% block content %}
+  <div class="content-card">
+    <h2 class="section-heading">Menu text recognition</h2>
+    <p class="section-description">If you upload a picture of the menu, it will recognize the Korean text and translate it into English.</p>
+    
+    {% if preview_image %}
+      <div class="preview-container">
+        <img src="{{ preview_image }}" alt="메뉴판 이미지" class="preview-img">
+        
+        {% if not ocr_result and not processing_started %}
+          <div class="action-buttons">
+            <form action="{{ url_for('menu.process_menu') }}" method="post" enctype="multipart/form-data" id="process-form">
+              <input type="hidden" name="image_path" value="{{ image_path }}">
+              <button type="button" id="start-process-btn" class="btn btn-primary">Menu text recognition and translation</button>
+            </form>
+            <a href="{{ url_for('menu.menu_translate') }}" class="btn btn-outline">cancel</a>
+          </div>
+        {% endif %}
+        
+        {% if processing_started and not ocr_result %}
+          <div class="processing-overlay" id="processingOverlay">
+            <div class="processing-modal">
+              <div class="spinner"></div>
+              <p class="processing-text">Recognizing and translating the menu...</p>
+              <p class="processing-subtext">This may take a few moments</p>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    {% else %}
+      <form action="{{ url_for('menu.menu_upload') }}" method="post" enctype="multipart/form-data" id="menu-upload-form">
+        <div class="upload-container">
+          <label for="menu-file-input" class="upload-box">
+            <i class="bi bi-translate upload-icon"></i>
+            <p class="upload-text">Take a picture of the menu or select it</p>
+            <p class="upload-description">We will translate the Korean menu into English.</p>
+          </label>
+          <input type="file" id="menu-file-input" name="file" accept="image/*" style="display: none;" onchange="document.getElementById('menu-upload-form').submit();">
+        </div>
+      </form>
+    {% endif %}
+  </div>
+  
+  {% if ocr_error or translation_error or system_error %}
+    <div class="content-card error-card">
+      <h2 class="section-heading">Error Information</h2>
+      
+      {% if ocr_error %}
+        <div class="error-message">
+          <h3>OCR Error:</h3>
+          <p>{{ ocr_error }}</p>
+          <p class="error-help">The system couldn't recognize text in the image. Please try with a clearer image or make sure the text is visible.</p>
+        </div>
+      {% endif %}
+      
+      {% if translation_error %}
+        <div class="error-message">
+          <h3>Translation Error:</h3>
+          <p>{{ translation_error }}</p>
+          <p class="error-help">The system recognized text but couldn't translate it. Please try again later.</p>
+        </div>
+      {% endif %}
+      
+      {% if system_error %}
+        <div class="error-message">
+          <h3>System Error:</h3>
+          <p>{{ system_error }}</p>
+          <p class="error-help">An unexpected error occurred. Our team has been notified and will investigate the issue.</p>
+        </div>
+      {% endif %}
+      
+      <a href="{{ url_for('menu.menu_translate') }}" class="btn btn-outline btn-retry">Try Again with Another Image</a>
+    </div>
+  {% endif %}
+  
+  {% if ocr_result %}
+    <div class="content-card result-card">
+      <h2 class="section-heading">Translation Results</h2>
+      
+      <div class="table-container">
+        <table class="translation-table">
+          <thead>
+            <tr>
+              <th>Korean (Original)</th>
+              <th>English (Translation)</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% if ocr_result.translated_items %}
+            {% for item in ocr_result.translated_items %}
+              <tr>
+                <td class="korean-text">{{ item.original }}</td>
+                <td class="english-text">{{ item.translated }}</td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            {% if ocr_result.original_text and ocr_result.translated_text %}
+              {% set korean_lines = ocr_result.original_text.split('\n') %}
+              {% set english_lines = ocr_result.translated_text.split('\n') %}
+              
+              {% for i in range(korean_lines|length) %}
+                <tr>
+                  <td class="korean-text">{{ korean_lines[i] }}</td>
+                  <td class="english-text">
+                    {% if i < english_lines|length %}
+                      {{ english_lines[i] }}
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            {% endif %}
+          {% endif %}
+          </tbody>
+        </table>
+      </div>
+      
+      <div class="action-buttons centered">
+        <a href="{{ url_for('menu.menu_translate') }}" class="btn btn-primary btn-new-recognition">Recognize Another Menu</a>
+        <button class="btn btn-outline btn-copy" id="copy-table-btn">
+          <i class="bi bi-clipboard"></i> Copy Translation
+        </button>
+      </div>
+    </div>
+  {% endif %}
+<style>
+  .section-heading {
+    color: var(--primary);
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+  }
+  
+  .section-description {
+    color: #666;
+    margin-bottom: 20px;
+  }
+  
+  .upload-description {
+    color: #888;
+    font-size: 0.9rem;
+    margin-top: 8px;
+  }
+  
+  .preview-container {
+    position: relative;
+    margin-bottom: 20px;
+  }
+  
+  .preview-img {
+    width: 100%;
+    max-height: 500px;
+    object-fit: contain;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+  }
+  
+  .action-buttons {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+  }
+  
+  .action-buttons.centered {
+    justify-content: center;
+    margin-top: 25px;
+  }
+  
+  .btn-new-recognition {
+    padding: 10px 20px;
+  }
+  
+  .btn-copy {
+    padding: 10px 20px;
+  }
+  
+  .processing-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;
+    z-index: 10;
+  }
+  
+  .processing-modal {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    max-width: 80%;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  }
+  
+  .spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid var(--primary);
+    border-radius: 50%;
+    margin: 0 auto 20px;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .processing-text {
+    font-size: 1.2rem;
+    color: #333;
+    margin-bottom: 5px;
+  }
+  
+  .processing-subtext {
+    color: #777;
+    margin: 0;
+  }
+  
+  .result-card {
+    border-left: 4px solid var(--primary);
+  }
+  
+  /* Updated Table Styles */
+  .table-container {
+    overflow-x: auto;
+    margin: 20px 0;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .translation-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  
+  .translation-table thead {
+    background-color: var(--primary);
+    color: white;
+  }
+  
+  .translation-table th {
+    padding: 15px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 1.1rem;
+    position: sticky;
+    top: 0;
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .translation-table tbody tr {
+    transition: background-color 0.2s;
+  }
+  
+  .translation-table tbody tr:nth-child(even) {
+    background-color: #f8f9fa;
+  }
+  
+  .translation-table tbody tr:hover {
+    background-color: #f1f3f5;
+  }
+  
+  .translation-table td {
+    padding: 15px;
+    border-bottom: 1px solid #e9ecef;
+    vertical-align: top;
+  }
+  
+  .translation-table td:first-child {
+    border-right: 1px solid #e9ecef;
+  }
+  
+  .korean-text {
+    font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+    width: 50%;
+  }
+  
+  .english-text {
+    font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+    width: 50%;
+  }
+  
+  /* Empty state for table */
+  .translation-table tbody tr.empty-row td {
+    text-align: center;
+    padding: 30px;
+    color: #6c757d;
+  }
+  
+  .error-card {
+    border-left: 4px solid #dc3545;
+  }
+  
+  .error-message {
+    background-color: #f8d7da;
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 15px;
+  }
+  
+  .error-message h3 {
+    color: #721c24;
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+  }
+  
+  .error-message p {
+    margin: 0 0 10px 0;
+    color: #721c24;
+  }
+  
+  .error-help {
+    background-color: #fff;
+    border-left: 3px solid #721c24;
+    padding: 10px;
+    font-size: 0.9rem;
+    color: #555;
+    margin-top: 10px;
+  }
+  
+  .btn-retry {
+    margin-top: 10px;
+  }
+  
+  /* Dark mode styles */
+  .dark-theme .translation-table thead {
+    background-color: var(--primary);
+  }
+  
+  .dark-theme .translation-table tbody tr:nth-child(even) {
+    background-color: #333;
+  }
+  
+  .dark-theme .translation-table tbody tr:hover {
+    background-color: #444;
+  }
+  
+  .dark-theme .translation-table td {
+    border-bottom-color: #444;
+    color: #eee;
+  }
+  
+  .dark-theme .translation-table td:first-child {
+    border-right-color: #444;
+  }
+  
+  .dark-theme .table-container {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  
+  .dark-theme .processing-modal {
+    background-color: #333;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+  }
+  
+  .dark-theme .processing-text {
+    color: #eee;
+  }
+  
+  .dark-theme .processing-subtext {
+    color: #aaa;
+  }
+  
+  .dark-theme .spinner {
+    border-color: #444;
+    border-top-color: var(--primary);
+  }
+  
+  /* Responsive styles */
+  @media (max-width: 768px) {
+    .translation-table th,
+    .translation-table td {
+      padding: 10px;
+    }
+    
+    .korean-text,
+    .english-text {
+      font-size: 0.95rem;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .action-buttons {
+      flex-direction: column;
+    }
+    
+    .processing-modal {
+      padding: 20px;
+      max-width: 90%;
+    }
+    
+    .translation-table th {
+      font-size: 0.9rem;
+    }
+    
+    .korean-text,
+    .english-text {
+      font-size: 0.85rem;
+    }
+  }
+  
+  /* Copy button success animation */
+  @keyframes copySuccess {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }
+  
+  .copy-success {
+    color: #28a745;
+    animation: copySuccess 0.3s ease;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // 처리 시작 버튼
+    const startProcessBtn = document.getElementById('start-process-btn');
+    if (startProcessBtn) {
+      startProcessBtn.addEventListener('click', function() {
+        // 버튼과 취소 버튼 숨기기
+        const actionButtons = document.querySelector('.action-buttons');
+        if (actionButtons) {
+          actionButtons.style.display = 'none';
+        }
+        
+        // 처리 오버레이 표시
+        const processingOverlay = document.createElement('div');
+        processingOverlay.className = 'processing-overlay';
+        processingOverlay.innerHTML = `
+          <div class="processing-modal">
+            <div class="spinner"></div>
+            <p class="processing-text">Recognizing and translating the menu...</p>
+            <p class="processing-subtext">This may take a few moments</p>
+          </div>
+        `;
+        
+        const previewContainer = document.querySelector('.preview-container');
+        if (previewContainer) {
+          previewContainer.appendChild(processingOverlay);
+        }
+        
+        // 폼 제출
+        document.getElementById('process-form').submit();
+      });
+    }
+    
+    // 복사 버튼 기능 - 테이블 전체 복사
+    const copyBtn = document.getElementById('copy-table-btn');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', function() {
+        // 테이블 데이터 추출 및 형식화
+        const table = document.querySelector('.translation-table');
+        if (table) {
+          let copyText = "";
+          const rows = table.querySelectorAll('tbody tr');
+          
+          rows.forEach(row => {
+            const koreanCell = row.querySelector('.korean-text');
+            const englishCell = row.querySelector('.english-text');
+            
+            if (koreanCell && englishCell) {
+              const koreanText = koreanCell.textContent.trim();
+              const englishText = englishCell.textContent.trim();
+              
+              if (koreanText || englishText) {
+                copyText += `${koreanText} - ${englishText}\n`;
+              }
+            }
+          });
+          
+          // 클립보드에 복사
+          navigator.clipboard.writeText(copyText).then(
+            function() {
+              // 복사 성공 표시
+              copyBtn.innerHTML = '<i class="bi bi-check"></i> Copied!';
+              copyBtn.classList.add('copy-success');
+              
+              setTimeout(function() {
+                copyBtn.innerHTML = '<i class="bi bi-clipboard"></i> Copy Translation';
+                copyBtn.classList.remove('copy-success');
+              }, 2000);
+            },
+            function(err) {
+              console.error('복사 실패:', err);
+              alert('복사에 실패했습니다. 다시 시도해주세요.');
+            }
+          );
+        }
+      });
+    }
+    
+    // 빈 행 처리
+    const tableRows = document.querySelectorAll('.translation-table tbody tr');
+    tableRows.forEach(row => {
+      const koreanCell = row.querySelector('.korean-text');
+      const englishCell = row.querySelector('.english-text');
+      
+      if ((!koreanCell || koreanCell.textContent.trim() === '') && 
+          (!englishCell || englishCell.textContent.trim() === '')) {
+        row.style.display = 'none';
+      }
+    });
+    
+    // 테이블에 행이 없으면 안내 메시지 추가
+    const tableBody = document.querySelector('.translation-table tbody');
+    if (tableBody && tableBody.querySelectorAll('tr:not([style*="display: none"])').length === 0) {
+      const emptyRow = document.createElement('tr');
+      emptyRow.className = 'empty-row';
+      emptyRow.innerHTML = '<td colspan="2">No translation results found. Please try again with a clearer image.</td>';
+      tableBody.appendChild(emptyRow);
+    }
+    
+    // 이미 처리 중인 경우 (새로고침 시)
+    const processingOverlay = document.getElementById('processingOverlay');
+    if (processingOverlay) {
+      // 이미 표시되어 있음
+    }
+  });
+</script>
+{% endblock %}

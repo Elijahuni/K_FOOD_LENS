@@ -1,0 +1,447 @@
+<!-- templates/auth/register.html -->
+{% extends "base.html" %}
+
+{% block title %}K-FOOD LENS - Register{% endblock %}
+
+{% block content %}
+<section class="auth-section">
+  <div class="content-card auth-card">
+    <h2 class="auth-title">Create Account</h2>
+    <p class="auth-subtitle">Join K-FOOD LENS to save your recognition history and get personalized recommendations.</p>
+    
+    <form action="{{ url_for('auth.register') }}" method="post" class="auth-form">
+      <!-- 기본 정보 -->
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="password_confirm">Confirm Password</label>
+        <input type="password" id="password_confirm" name="password_confirm" required>
+      </div>
+
+      <!-- 알레르기 정보 섹션 -->
+      <div class="preferences-section">
+        <h3 class="section-title">Recognize Korean food and check allergy information.</h3>
+        
+        <div class="allergen-grid">
+          <!-- 첫 번째 행 -->
+          <div class="allergen-row">
+            <div class="allergen-item">
+              <input type="checkbox" id="gluten" name="allergens" value="gluten" class="allergen-checkbox">
+              <label for="gluten" class="allergen-label">Gluten</label>
+            </div>
+            
+            <div class="allergen-item">
+              <input type="checkbox" id="dairy" name="allergens" value="dairy" class="allergen-checkbox">
+              <label for="dairy" class="allergen-label">Dairy</label>
+            </div>
+          </div>
+          
+          <!-- 두 번째 행 -->
+          <div class="allergen-row">
+            <div class="allergen-item">
+              <input type="checkbox" id="soy" name="allergens" value="soy" class="allergen-checkbox">
+              <label for="soy" class="allergen-label">Soy</label>
+            </div>
+            
+            <div class="allergen-item">
+              <input type="checkbox" id="nuts" name="allergens" value="nuts" class="allergen-checkbox">
+              <label for="nuts" class="allergen-label">Nuts</label>
+            </div>
+          </div>
+          
+          <!-- 세 번째 행 -->
+          <div class="allergen-row">
+            <div class="allergen-item">
+              <input type="checkbox" id="shellfish" name="allergens" value="shellfish" class="allergen-checkbox">
+              <label for="shellfish" class="allergen-label">Shellfish</label>
+            </div>
+            
+            <div class="allergen-item">
+              <input type="checkbox" id="fish" name="allergens" value="fish" class="allergen-checkbox">
+              <label for="fish" class="allergen-label">Fish</label>
+            </div>
+          </div>
+          
+          <!-- 네 번째 행 -->
+          <div class="allergen-row">
+            <div class="allergen-item">
+              <input type="checkbox" id="eggs" name="allergens" value="eggs" class="allergen-checkbox">
+              <label for="eggs" class="allergen-label">Eggs</label>
+            </div>
+            
+            <div class="allergen-item">
+              <input type="checkbox" id="sesame" name="allergens" value="sesame" class="allergen-checkbox">
+              <label for="sesame" class="allergen-label">Sesame</label>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 채식 여부 섹션 -->
+      <div class="vegetarian-section">
+        <h3 class="section-title">Vegetarian Preference</h3>
+        <div class="vegetarian-option">
+          <input type="checkbox" id="vegetarian" name="vegetarian" class="vegetarian-checkbox">
+          <label for="vegetarian" class="vegetarian-label">I follow a vegetarian diet</label>
+        </div>
+      </div>
+      
+      <button type="submit" class="signup-btn">Sign Up</button>
+    </form>
+    
+    <div class="auth-footer">
+      <p>Already have an account? <a href="{{ url_for('auth.login') }}">Login</a></p>
+    </div>
+    
+    <div class="social-auth">
+      <p class="social-divider">Or sign up with</p>
+      <div class="social-buttons">
+        <button class="social-btn google-btn">
+          <i class="bi bi-google"></i> Google
+        </button>
+        <button class="social-btn kakao-btn">
+          <i class="bi bi-chat-fill"></i> Kakao
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .auth-section {
+    max-width: 550px;
+    margin: 40px auto;
+  }
+  
+  .auth-card {
+    text-align: center;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  }
+  
+  .auth-title {
+    color: var(--primary);
+    margin-bottom: 8px;
+    font-size: 1.8rem;
+    font-weight: 700;
+  }
+  
+  .auth-subtitle {
+    color: #666;
+    margin-bottom: 32px;
+    font-size: 1rem;
+  }
+  
+  .auth-form {
+    text-align: left;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+  }
+  
+  .form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+  }
+  
+  .form-group input:focus {
+    border-color: var(--primary);
+    outline: none;
+  }
+  
+  /* 알레르기 섹션 스타일 */
+  .preferences-section,
+  .vegetarian-section {
+    margin-top: 30px;
+    margin-bottom: 30px;
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 12px;
+  }
+  
+  .section-title {
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 20px;
+    text-align: left;
+    font-weight: 500;
+  }
+  
+  /* 알레르기 그리드 레이아웃 */
+  .allergen-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .allergen-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  
+  .allergen-item {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+  }
+  
+  .allergen-checkbox,
+  .vegetarian-checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-right: 12px;
+    position: relative;
+    cursor: pointer;
+  }
+  
+  .allergen-checkbox:checked,
+  .vegetarian-checkbox:checked {
+    background-color: var(--primary);
+    border-color: var(--primary);
+  }
+  
+  .allergen-checkbox:checked::after,
+  .vegetarian-checkbox:checked::after {
+    content: "✓";
+    color: white;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+  }
+  
+  .allergen-label,
+  .vegetarian-label {
+    font-size: 1rem;
+    cursor: pointer;
+    color: #333;
+    flex: 1;
+  }
+  
+  .vegetarian-option {
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+  }
+  
+  .vegetarian-section {
+    background-color: #f8f9fa;
+  }
+  
+  .signup-btn {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 30px;
+    transition: background-color 0.3s, transform 0.3s;
+  }
+  
+  .signup-btn:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
+  }
+  
+  .auth-footer {
+    margin-top: 24px;
+  }
+  
+  .auth-footer a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  
+  .social-auth {
+    margin-top: 32px;
+  }
+  
+  .social-divider {
+    position: relative;
+    text-align: center;
+    margin: 24px 0;
+    color: #666;
+  }
+  
+  .social-divider::before,
+  .social-divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 40%;
+    height: 1px;
+    background: var(--border-color);
+  }
+  
+  .social-divider::before {
+    left: 0;
+  }
+  
+  .social-divider::after {
+    right: 0;
+  }
+  
+  .social-buttons {
+    display: flex;
+    gap: 16px;
+  }
+  
+  .social-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: white;
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  
+  .social-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .social-btn i {
+    margin-right: 8px;
+  }
+  
+  .google-btn {
+    color: #333;
+  }
+  
+  .kakao-btn {
+    background-color: #FEE500;
+    color: #000;
+    border-color: #FEE500;
+  }
+  
+  /* 다크 모드 스타일 */
+  .dark-theme .auth-card {
+    background-color: #222;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  }
+  
+  .dark-theme .auth-subtitle {
+    color: #aaa;
+  }
+  
+  .dark-theme .form-group label {
+    color: #ddd;
+  }
+  
+  .dark-theme .form-group input {
+    background-color: #333;
+    border-color: #444;
+    color: #ddd;
+  }
+  
+  .dark-theme .preferences-section,
+  .dark-theme .vegetarian-section {
+    background-color: #333;
+  }
+  
+  .dark-theme .section-title {
+    color: #ddd;
+  }
+  
+  .dark-theme .allergen-label,
+  .dark-theme .vegetarian-label {
+    color: #ddd;
+  }
+  
+  .dark-theme .allergen-checkbox,
+  .dark-theme .vegetarian-checkbox {
+    border-color: #555;
+    background-color: #222;
+  }
+  
+  .dark-theme .social-btn {
+    background-color: #333;
+    border-color: #444;
+    color: #ddd;
+  }
+  
+  .dark-theme .kakao-btn {
+    background-color: #FEE500;
+    color: #000;
+  }
+  
+  /* 반응형 스타일 */
+  @media (max-width: 576px) {
+    .auth-section {
+      padding: 0 16px;
+    }
+    
+    .auth-card {
+      padding: 20px;
+    }
+    
+    .auth-title {
+      font-size: 1.5rem;
+    }
+    
+    .auth-subtitle {
+      font-size: 0.9rem;
+    }
+    
+    .section-title {
+      font-size: 1rem;
+    }
+    
+    /* 모바일에서는 체크박스 한 줄에 하나씩 표시 */
+    .allergen-row {
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .form-group input,
+    .signup-btn,
+    .social-btn {
+      padding: 10px;
+    }
+  }
+</style>
+{% endblock %}

@@ -1,0 +1,345 @@
+<!--templates/info/contact.html-->
+{% extends "base.html" %}
+
+{% block title %}K-FOOD LENS - Contact Us{% endblock %}
+
+{% block content %}
+<div class="content-card">
+  <div class="page-header">
+    <h1 class="page-title">Contact Us</h1>
+    <p class="page-subtitle">Get in touch with our team for support or inquiries about K-FOOD LENS.</p>
+  </div>
+  
+  <div class="contact-container">
+    <div class="contact-section">
+      <div class="contact-icon">
+        <i class="bi bi-headset"></i>
+      </div>
+      <div class="contact-details">
+        <h2>Customer Support</h2>
+        <p>Need help with the app or have questions about how to use K-FOOD LENS?</p>
+        <div class="contact-info-item">
+          <i class="bi bi-envelope"></i>
+          <a href="mailto:support@kfoodlens.com">support@kfoodlens.com</a>
+        </div>
+        <div class="contact-info-item">
+          <i class="bi bi-telephone"></i>
+          <a href="tel:+821012345678">+82-10-1234-5678</a>
+        </div>
+        <p class="support-hours">Support Hours: 9AM - 6PM KST (Mon-Fri)</p>
+      </div>
+    </div>
+    
+    <div class="contact-section">
+      <div class="contact-icon">
+        <i class="bi bi-chat-dots"></i>
+      </div>
+      <div class="contact-details">
+        <h2>Feedback & Suggestions</h2>
+        <p>We're constantly improving K-FOOD LENS and would love to hear your ideas!</p>
+        <div class="contact-form">
+          <form id="feedback-form">
+            <div class="form-group">
+              <label for="name">Name</label>
+              <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+              <label for="subject">Subject</label>
+              <select id="subject" name="subject">
+                <option value="feedback">General Feedback</option>
+                <option value="suggestion">Feature Suggestion</option>
+                <option value="bug">Bug Report</option>
+                <option value="business">Business Inquiry</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="message">Message</label>
+              <textarea id="message" name="message" rows="5" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Send Message</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    
+    <div class="contact-section">
+      <div class="contact-icon">
+        <i class="bi bi-building"></i>
+      </div>
+      <div class="contact-details">
+        <h2>Business & Partnerships</h2>
+        <p>Interested in partnering with us or have business inquiries?</p>
+        <div class="contact-info-item">
+          <i class="bi bi-envelope"></i>
+          <a href="mailto:business@kfoodlens.com">business@kfoodlens.com</a>
+        </div>
+        <div class="contact-address">
+          <i class="bi bi-geo-alt"></i>
+          <address>
+            K-FOOD LENS Headquarters<br>
+            123 Food Tech Street, Gangnam-gu<br>
+            Seoul, South Korea 06123
+          </address>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<style>
+  .page-header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 30px 0;
+    background-color: rgba(255, 74, 74, 0.05);
+    border-radius: 12px;
+  }
+  
+  .page-title {
+    color: var(--primary);
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    font-weight: 700;
+  }
+  
+  .page-subtitle {
+    color: #666;
+    font-size: 1.2rem;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .contact-container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .contact-section {
+    display: flex;
+    margin-bottom: 40px;
+    padding-bottom: 40px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .contact-section:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-bottom: 0;
+  }
+  
+  .contact-icon {
+    flex: 0 0 80px;
+    height: 80px;
+    background-color: rgba(255, 74, 74, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 30px;
+  }
+  
+  .contact-icon i {
+    font-size: 2.5rem;
+    color: var(--primary);
+  }
+  
+  .contact-details {
+    flex: 1;
+  }
+  
+  .contact-details h2 {
+    color: var(--primary);
+    font-size: 1.6rem;
+    margin-bottom: 15px;
+    font-weight: 600;
+  }
+  
+  .contact-details p {
+    color: #555;
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+    line-height: 1.5;
+  }
+  
+  .contact-info-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+  
+  .contact-info-item i {
+    font-size: 1.2rem;
+    color: var(--primary);
+    margin-right: 15px;
+    width: 20px;
+    text-align: center;
+  }
+  
+  .contact-info-item a {
+    color: #333;
+    text-decoration: none;
+    transition: color 0.2s;
+    font-size: 1.1rem;
+  }
+  
+  .contact-info-item a:hover {
+    color: var(--primary);
+    text-decoration: underline;
+  }
+  
+  .support-hours {
+    font-size: 0.9rem;
+    color: #666;
+    margin-top: 15px;
+    font-style: italic;
+  }
+  
+  .contact-address {
+    display: flex;
+    margin-top: 15px;
+  }
+  
+  .contact-address i {
+    font-size: 1.2rem;
+    color: var(--primary);
+    margin-right: 15px;
+    margin-top: 3px;
+  }
+  
+  .contact-address address {
+    font-style: normal;
+    color: #333;
+    line-height: 1.6;
+  }
+  
+  .contact-form {
+    margin-top: 20px;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+  }
+  
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+  }
+  
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(255, 74, 74, 0.2);
+  }
+  
+  /* Dark theme styles */
+  .dark-theme .page-header {
+    background-color: rgba(255, 74, 74, 0.1);
+  }
+  
+  .dark-theme .page-subtitle {
+    color: #ccc;
+  }
+  
+  .dark-theme .contact-section {
+    border-bottom-color: #444;
+  }
+  
+  .dark-theme .contact-icon {
+    background-color: rgba(255, 74, 74, 0.2);
+  }
+  
+  .dark-theme .contact-details p,
+  .dark-theme .contact-address address {
+    color: #ccc;
+  }
+  
+  .dark-theme .contact-info-item a {
+    color: #eee;
+  }
+  
+  .dark-theme .support-hours {
+    color: #aaa;
+  }
+  
+  .dark-theme .form-group label {
+    color: #eee;
+  }
+  
+  .dark-theme .form-group input,
+  .dark-theme .form-group select,
+  .dark-theme .form-group textarea {
+    background-color: #333;
+    border-color: #444;
+    color: #eee;
+  }
+  
+  .dark-theme .form-group input:focus,
+  .dark-theme .form-group select:focus,
+  .dark-theme .form-group textarea:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(255, 74, 74, 0.2);
+  }
+  
+  /* Responsive styles */
+  @media (max-width: 768px) {
+    .contact-section {
+      flex-direction: column;
+    }
+    
+    .contact-icon {
+      margin: 0 auto 20px;
+    }
+    
+    .contact-details {
+      text-align: center;
+    }
+    
+    .contact-info-item,
+    .contact-address {
+      justify-content: center;
+    }
+  }
+</style>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const feedbackForm = document.getElementById('feedback-form');
+    
+    if (feedbackForm) {
+      feedbackForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // 폼 데이터 수집
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email').value;
+        const subject = document.getElementById('subject').value;
+        const message = document.getElementById('message').value;
+        
+        // 실제로는 서버로 데이터를 전송하는 코드가 여기에 들어갈 것입니다.
+        // 현재는 데모용으로 alert 표시
+        alert(`Thank you for your message, ${name}!\n\nWe've received your ${subject} and will get back to you at ${email} as soon as possible.`);
+        
+        // 폼 초기화
+        feedbackForm.reset();
+      });
+    }
+  });
+</script>
+{% endblock %}
