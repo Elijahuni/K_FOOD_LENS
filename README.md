@@ -18,10 +18,9 @@
 |------|------|
 | AI 모델 | YOLOv8-nano, YOLOv8-medium, YOLOv8-large (앙상블) |
 | OCR | EasyOCR |
-| 백엔드 | Flask, Python 3.9 |
+| 백엔드 | Flask, Python |
 | 데이터베이스 | MongoDB |
 | 프론트엔드 | HTML, CSS, JavaScript, Bootstrap |
-| 배포 | Google Cloud Platform (Cloud Run) |
 | 기타 | OpenCV, Numpy, Deep-Translator |
 
 ## 📋 시스템 요구사항
@@ -168,13 +167,9 @@ pytest
 
 ## 👥 팀원
 
-- 홍길동 - 팀장, AI 모델 개발
-- 김철수 - 백엔드 개발
-- 이영희 - 프론트엔드 개발
-- 박지성 - 데이터베이스 및 인프라
-
+- Elijah - 팀장, AI 모델, Full-stack(Frontend, Backend) 개발
 ## 📞 기여 및 문의
 
 이슈, 기능 요청, 풀 리퀘스트를 환영합니다! 
 
-문의사항은 [issues 페이지](https://github.com/yourusername/kfood-lens/issues)나 이메일 `contact@kfoodlens.com`로 연락 주세요.
+문의사항은 [issues 페이지](https://github.com/eiljahuni/kfood-lens/issues)로 연락 주세요.
