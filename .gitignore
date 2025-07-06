@@ -203,3 +203,5 @@ models/
 # Temporary files
 tmp/
 temp/
+/kfood_env
+static/images/kfood_lens_banner.png
